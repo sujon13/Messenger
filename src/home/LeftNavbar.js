@@ -8,6 +8,7 @@ import IconButton from '@material-ui/core/IconButton';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import { Avatar } from '@material-ui/core';
+import Tooltip from '@material-ui/core/Tooltip';
 import image1 from './../static/images/image1.jpg';
 
 const useStyles = makeStyles((theme) => ({
@@ -29,7 +30,7 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-export default function LeftTopBar() {
+export default function LeftTopBar(props) {
     const classes = useStyles();
 
     return (
@@ -37,7 +38,9 @@ export default function LeftTopBar() {
             <Paper className={classes.paper} elevation={1}>
                 <Grid container direction="row">
                     <Grid item xs={4}>
-                        <Avatar alt="Remy Sharp" src={image1}/>
+                        <Tooltip title={props.user.name} placement="right">
+                            <Avatar alt={props.user.name} src={ props.user.profilePic}/>
+                        </Tooltip>
                     </Grid>
                     <Grid item xs={4}>
                         <Typography variant="h6" className={classes.title}>

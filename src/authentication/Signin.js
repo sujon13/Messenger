@@ -16,8 +16,10 @@ import {
     BrowserRouter as Router,
     Switch,
     Route,
-    Link
+    Link,
+    Redirect
 } from "react-router-dom";
+import { TramOutlined } from '@material-ui/icons';
 
 
 function Copyright() {
@@ -53,19 +55,24 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-export default function SignIn() {
+export default function SignIn(props) {
     const classes = useStyles();
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [hidden, setHidden] = useState(TramOutlined);
+    const [user, setUser] = useState({});
+    const [redirect, setRedirect] = useState(false);
+    const [data, setData] = useState({});
 
     async function handleSubmit(e) {
         e.preventDefault();
         setError('');
         
         const baseUrl = 'http://localhost:3001/api/v1';
+        //const baseUrl = 'http://f117216464b9.ngrok.io/api/v1';
         const option = {
             method: 'post',
             url: `${baseUrl}/users/signin`,
@@ -81,12 +88,14 @@ export default function SignIn() {
             const response = await axios(option);
             if (response.data) {
                 console.log(response.data);
-                alert(JSON.stringify(response.data));
-                window.location = '/home';
+                setData(response.data);
+                setRedirect(true); 
+                setIsLoading(false);
+                //window.location = `/home`;
             }
         } catch(error) {
             console.log(error);
-            if(error.response.data) {
+            if(error.response) {
                 setError(error.response.data);
             }
             setIsLoading(false);
@@ -95,6 +104,17 @@ export default function SignIn() {
 
     if (isLoading) {
         return <p>loading...</p>;
+    }
+
+    if(redirect) {
+        return (
+            <Redirect
+                to={{
+                    pathname: '/home',
+                    state: data
+                }}
+            />    
+        )
     }
 
     return (

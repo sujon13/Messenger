@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
@@ -37,71 +37,12 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-const userList = [
-    {
-        name: 'Arifur Rahman Sujon',
-        profilePic: image1
-    },
-    {
-        name: 'Badhon Rahman',
-        profilePic: profile2
-    },
-    {
-        name: 'Choyon Biswas',
-        profilePic: profile3
-    },
-    {
-        name: 'Dravid',
-        profilePic: profile4
-    },
-    {
-        name: 'Emran Hossen',
-        profilePic: profile5
-    },
-    {
-        name: 'Arifur Rahman Sujon',
-        profilePic: image1
-    },
-    {
-        name: 'Badhon Rahman',
-        profilePic: profile2
-    },
-    {
-        name: 'Choyon Biswas',
-        profilePic: profile3
-    },
-    {
-        name: 'Dravid',
-        profilePic: profile4
-    },
-    {
-        name: 'Emran Hossen',
-        profilePic: profile5
-    },
-    {
-        name: 'Arifur Rahman Sujon',
-        profilePic: image1
-    },
-    {
-        name: 'Badhon Rahman',
-        profilePic: profile2
-    },
-    {
-        name: 'Choyon Biswas',
-        profilePic: profile3
-    },
-    {
-        name: 'Dravid',
-        profilePic: profile4
-    },
-    {
-        name: 'Emran Hossen',
-        profilePic: profile5
-    },
-]
-
 export default function UserList(props) {
     const classes = useStyles();
+
+    if(props.userList.length === 0) {
+        return <p>loading...</p>
+    }
 
     return (
         <div className={classes.root}>
@@ -109,22 +50,22 @@ export default function UserList(props) {
                 <Grid container direction="col">
                     <React.Fragment>
                         {
-                            userList.map((user, index) => 
+                            props.userList.map((user, index) => 
                                 <Grid
                                     key={index.toString()}
                                     container
                                     item 
                                     direction="row" 
                                     className={classes.list}
-                                    onClick={() => { props.handleUser(user)}}
+                                    onClick={() => { props.handleUser(user) }}
                                 >
-                                    <Grid item>
+                                    <Grid item xs={3}>
                                         <Avatar 
                                             alt={user.name} 
                                             src={user.profilePic}
                                         />
                                     </Grid>
-                                    <Grid item>
+                                    <Grid item xs={9} style={{textAlign: 'left'}}>
                                         <Typography variant="inherit" className={classes.title}>
                                             {user.name}
                                         </Typography>

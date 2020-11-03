@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
@@ -9,10 +9,8 @@ import LeftTopBar from './LeftNavbar';
 import Chat from './Chat';
 import UserList from './UserList';
 import ChatList from './ChatList';
-import { Divider } from '@material-ui/core';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
+import axios from 'axios';
+import {isEmpty} from "lodash"
 
 
 const useStyles = makeStyles((theme) => ({
@@ -38,7 +36,7 @@ const useStyles = makeStyles((theme) => ({
     },
     list: {
         marginTop: theme.spacing(0),
-        maxHeight: '80vh',
+        maxHeight: '85vh',
         overflow: 'auto',
     },
     option: {
@@ -47,16 +45,105 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 
-export default function Home() {
+export default function Home(props) {
     const classes = useStyles();
 
     const [isChatShown, setIsChatShown] = useState(true);
-    const [user, setUser] = useState({name: 'xx', profilePic: 'yy'});
+    const [user, setUser] = useState({});
+    const [owner, setOwner] = useState({});
+    const [userList, setUserList] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [userListScrollIsLoading, setUserListScrollIsLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [pageForUserList, setPageForUserList] = useState(1);
 
     function handleUser(user) {
-        alert(user.name);
         setUser(user);
     }
+
+    function handleScroll(e) {
+        if (isChatShown === false) {
+            handleScrollForUserList(e);
+        }
+    }
+
+    function handleScrollForUserList(e) {
+        let element = e.target
+        const top = element.scrollTop;
+        if(top === 0)return;
+        if (element.scrollHeight - element.scrollTop === element.clientHeight) {
+            console.log('scrolled down');
+            const token = localStorage.getItem(`token-${owner.email}`);
+            fetchUsers(token, owner);
+            element.scrollTop = top;
+        }
+    }
+
+    function filterUserList(owner, userList) {
+        const newUserList = userList.filter((user) => {
+            if(user.email !== owner.email) {
+                console.log(user.email, owner.email);
+                return user;
+            }
+        });
+        return newUserList;
+    }
+
+    const fetchUsers = async (accessToken, owner) => {
+        console.log(accessToken);
+        const baseUrl = 'http://localhost:3001/api/v1';
+        //const baseUrl = 'http://f117216464b9.ngrok.io/api/v1';
+        const option = {
+            method: 'get',
+            url: `${baseUrl}/users`,
+            params: {
+                page: pageForUserList,
+                limit: 15
+            },
+            headers: {
+                Authorization: `Bearer ${accessToken}`
+            },
+        };
+        setUserListScrollIsLoading(true);
+        setError('');
+        try {
+            const response = await axios(option);
+            if (response.data) {
+                console.log(response.data);
+                const currentUserList = filterUserList(owner, response.data);
+                console.log(userList.length);
+                
+                const newUserList = userList.concat(currentUserList);
+                console.log(newUserList.length);
+                setUserList(newUserList);
+                setPageForUserList(pageForUserList + 1);
+                setUserListScrollIsLoading(false);
+            }
+        } catch(error) {
+            console.log(error);
+            if(error.response) {
+                setError('something went wrong!');
+            }
+            setUserListScrollIsLoading(false);
+        }
+    }
+
+    useEffect(() => {
+        const data = window.history.state.state;
+        const profile = data.profile;
+        profile.profilePic = profile.name;
+        localStorage.setItem(`token-${profile.email}`, data.accessToken);
+        setOwner(profile);
+       
+        fetchUsers(data.accessToken, profile);
+    },[]);
+
+    if(isEmpty(owner)) {
+        return(
+            <p></p>
+        );
+    }
+
     return (
         <div className={classes.root}>
             <Grid 
@@ -66,7 +153,7 @@ export default function Home() {
             >
                 <Grid container item direction="col" sm={4}>
                     <Grid item xs={12}>
-                        <LeftTopBar/>
+                        <LeftTopBar user={owner}/>
                     </Grid>
                     <Grid container item xs={12} style={{marginTop: "0px"}}>
                         <Grid item xs={6}>
@@ -87,16 +174,45 @@ export default function Home() {
                         </Grid>
                     </Grid>
 
-                    <Grid item xs={12} className={classes.list}>
+                    <Grid 
+                        item 
+                        xs={12} 
+                        className={classes.list} 
+                        onScroll={handleScroll}
+                    >
                         {
-                            isChatShown === true 
-                                ? <ChatList handleUser = { handleUser }/> 
-                                : <UserList handleUser= { handleUser }/>
+                            isLoading 
+                                ? <p>Loading...</p> 
+                                : error !== ''
+                                    ? <p>Error!!</p>
+                                    : isChatShown === true 
+                                        ? <ChatList handleUser = { handleUser }/> 
+                                        : ( 
+                                            <Grid container direction='col'>
+                                                <Grid item xs={12}>
+                                                    <UserList 
+                                                        handleUser={ handleUser }
+                                                        userList={ userList }
+                                                    />
+                                                </Grid>
+                                                <Grid item xs={12}>
+                                                    {
+                                                        userListScrollIsLoading 
+                                                        ? <p>loading..</p>
+                                                        : <p></p>
+                                                    }
+                                                </Grid>
+                                            </Grid>
+                                          )
                         }
                     </Grid>
                 </Grid>
                 <Grid item sm={8}>
-                    <Chat user = {user}/>
+                    {
+                        // (isEmpty(user) === false)
+                        //     ? <Chat user = {user} owner = {owner}/>
+                        //     : <div style={{textAlign: 'center'}}>Start Chatting</div>
+                    }   <Chat user = {user} owner = {owner}/>  
                 </Grid>
             </Grid>
         </div>

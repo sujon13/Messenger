@@ -11,7 +11,12 @@ import Icon from '@material-ui/core/Icon';
 import IconButton from '@material-ui/core/IconButton';
 import SendIcon from '@material-ui/icons/Send';
 import ChatTopBar from './ChatNavbar';
-
+import socketIOClient from "socket.io-client";
+import axios from 'axios';
+import {isEmpty} from "lodash";
+//const ENDPOINT = "http://15aa11984e70.ngrok.io";
+const ENDPOINT = 'http://localhost:4001';
+const socket = socketIOClient(ENDPOINT);
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -23,35 +28,122 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
+let message_list = [];
+
 export default function Chat(props) {
     const classes = useStyles();
 
-    const [message, setMessage] = useState('');
     const [messageList, setMessageList] = useState([]);
+    const [updateMessage, setUpdateMessage] = useState(false);
+    const [loadMessage, setLoadMessage] = useState(Date.now());
 
     function handleSendMessage(e) {
         e.preventDefault();
         const element = document.getElementById('message');
         const message = element.value.trim();
         element.value = '';
-        if(message === '')return;
+        if(isEmpty(message))return;
 
-        setMessage(message + Date.now());
-        const localMessageList = messageList;
-        localMessageList.push(message);
-        setMessageList(localMessageList);    
+        const messageObj = {
+            from: props.owner.email,
+            to: props.user.email,
+            text: message,
+            time: Date.now()
+        };
+    
+        sendMessageToCloud(messageObj);
+        saveMessage(messageObj);
+    }
+
+    function saveMessage(message) {
+        //setMessageList([...messageList, message]);
+        message_list.push(message);
+        //setUpdateMessage(1 - updateMessage);
+        setLoadMessage(Date.now());
+        console.log('message saved');
+    }
+
+    async function sendMessageToCloud(message) {
+        //const socket = socketIOClient(ENDPOINT);
+        //socket.send(message);
+        socket.emit('chat', message);
     }
 
     function handleMessageChange(e) {
         const message = e.target.value;
         if(e.key === 'Enter') {
             handleSendMessage(e);
+            e.target.value = '';
         }
     }
 
     useEffect(() => {
-        setMessageList([]);
-    }, [props.user]);
+        //const socket = socketIOClient(ENDPOINT);
+        socket.on('connect', () => {
+            const token = localStorage.getItem(`token-${props.owner.email}`);
+            console.log(`token key: token-${props.owner.email}, value: ${token}`);
+            socket.emit('token', token);
+        });
+
+        socket.on('chat', (data) => {
+            console.log('list length: ', messageList.length);
+            console.log(data);
+            saveMessage(data);
+            
+        });
+
+        setInterval(() => {
+            socket.emit('heart-bit', props.owner.email);
+        }, 20000);
+
+        return () => {
+            console.log('connect will be closed');
+            socket.disconnect();
+        }
+        
+    }, []);
+
+    const fetchMessage = async (from, to) => {
+        const option = {
+            method: 'get',
+            url: 'http://localhost:4001/api/v1/messages',
+            //url: 'http://15aa11984e70.ngrok.io/api/v1/messages',
+            params: {
+                from: from,
+                to: to
+            }
+        };
+        //setUserListScrollIsLoading(true);
+        //setError('');
+        try {
+            const response = await axios(option);
+            if (response.data) {
+                console.log(response.data);
+                //setMessageList([...response.data]);
+                message_list = response.data;
+                setLoadMessage(Date.now());
+                console.log(messageList.length);
+                //setPageForUserList(pageForUserList + 1);
+                //setUserListScrollIsLoading(false);
+            }
+        } catch(error) {
+            console.log(error);
+            if(error.response) {
+                //setError('something went wrong!');
+            }
+            //setUserListScrollIsLoading(false);
+        }
+    }
+
+    useEffect(() => {
+        console.log('fetchCalled');
+        fetchMessage(props.owner.email, props.user.email);
+        console.log('fetch sesh');
+    }, [props.user])
+
+    /*if (isEmpty(props.user) && isEmpty(messageList)) {
+        return <p>...</p>
+    }*/
 
     return (
         <div className={classes.root}>
@@ -68,7 +160,11 @@ export default function Chat(props) {
                     xs={12} 
                     style={{paddingLeft: "16px"}}
                 >
-                    <ChatBox myList = { messageList }/>
+                    <ChatBox 
+                        messageList = { message_list }
+                        owner = { props.owner }
+                        user = { props.user }
+                    />
                 </Grid>
                 <Grid 
                     container 
@@ -104,11 +200,31 @@ export default function Chat(props) {
 function ChatBox(props) {
     useEffect(() => {
         const chatContainer = document.getElementById("chatBox");
-        chatContainer.scrollTop = chatContainer.scrollHeight;
+        if (chatContainer) {
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
     });
+
+    function filterMessageList() {
+        const messageList = [];
+        for(const message of props.messageList) {
+            if ((message.from === props.owner.email && message.to === props.user.email) 
+            || (message.from === props.user.email && message.to === props.owner.email) ) {
+                messageList.push(message);
+            }
+        }
+        return messageList;
+    }
+
+    if(isEmpty(props.user)) {
+        return(
+            <p></p>
+        );
+    }
 
     return (
         <div>
+            { console.log(props.messageList.length)}
             <Grid 
                 id='chatBox'
                 container 
@@ -118,16 +234,16 @@ function ChatBox(props) {
             >
                 {/* <React.Fragment> */}
                     {
-                        props.myList.map((val, index) => 
+                        filterMessageList().map((message, index) => 
                             <Grid key={index.toString()} item xs={12}>
                                 {
-                                    index % 2 === 0
+                                    message.from !== props.owner.email
                                         ? (
                                             <Box 
                                                 display="flex"
                                                 justifyContent="flex-start"
                                             >   
-                                                <Box>{val}</Box>
+                                                <Box>{message.text}</Box>
                                             </Box>
                                         )  : (
                                             <Box 
@@ -135,7 +251,7 @@ function ChatBox(props) {
                                                 justifyContent="flex-end"
                                                 style={{marginRight: '32px'}}
                                             >   
-                                                <Box>{val}</Box>
+                                                <Box>{message.text}</Box>
                                             </Box>
                                         )                  
                                 }

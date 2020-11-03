@@ -79,6 +79,7 @@ export default function SignUp() {
         }
 
         const baseUrl = 'http://localhost:3001/api/v1';
+        //const baseUrl = 'http://f117216464b9.ngrok.io/api/v1';
         const option = {
             method: 'post',
             url: `${baseUrl}/users`,
