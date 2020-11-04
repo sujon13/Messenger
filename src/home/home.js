@@ -151,11 +151,15 @@ export default function Home(props) {
                 direction="row" 
                 spacing={0}
             >
-                <Grid container item direction="col" sm={4}>
-                    <Grid item xs={12}>
-                        <LeftTopBar user={owner}/>
+                <Grid container item direction="col" sm={4} spacing={1}>
+                    <Grid item xs={12} style={{height: '40px', position: 'sticky'}}>
+                         <LeftTopBar user={owner}/>
                     </Grid>
-                    <Grid container item xs={12} style={{marginTop: "0px"}}>
+                    <Grid 
+                        container 
+                        item xs={12} 
+                        style={{height: '20px', position: 'sticky', marginTop: '0px', paddingTop: '0px'}}
+                    >
                         <Grid item xs={6}>
                             <Button
                                 variant="text"

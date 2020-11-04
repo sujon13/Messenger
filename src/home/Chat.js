@@ -10,6 +10,7 @@ import Button from '@material-ui/core/Button';
 import Icon from '@material-ui/core/Icon';
 import IconButton from '@material-ui/core/IconButton';
 import SendIcon from '@material-ui/icons/Send';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import ChatTopBar from './ChatNavbar';
 import socketIOClient from "socket.io-client";
 import axios from 'axios';
@@ -36,6 +37,8 @@ export default function Chat(props) {
     const [messageList, setMessageList] = useState([]);
     const [updateMessage, setUpdateMessage] = useState(false);
     const [loadMessage, setLoadMessage] = useState(Date.now());
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState('');
 
     function handleSendMessage(e) {
         e.preventDefault();
@@ -110,40 +113,64 @@ export default function Chat(props) {
             //url: 'http://15aa11984e70.ngrok.io/api/v1/messages',
             params: {
                 from: from,
-                to: to
+                to: to,
+                skip: message_list.length
             }
         };
-        //setUserListScrollIsLoading(true);
-        //setError('');
+        setIsLoading(true);
+        setError('');
         try {
             const response = await axios(option);
             if (response.data) {
                 console.log(response.data);
                 //setMessageList([...response.data]);
-                message_list = response.data;
+                message_list = [...response.data, ...message_list];
                 setLoadMessage(Date.now());
-                console.log(messageList.length);
+                console.log(message_list.length);
                 //setPageForUserList(pageForUserList + 1);
-                //setUserListScrollIsLoading(false);
+                setIsLoading(false);
             }
         } catch(error) {
             console.log(error);
             if(error.response) {
-                //setError('something went wrong!');
+                setError('something went wrong!');
             }
-            //setUserListScrollIsLoading(false);
+            setIsLoading(false);
         }
     }
 
     useEffect(() => {
-        console.log('fetchCalled');
-        fetchMessage(props.owner.email, props.user.email);
-        console.log('fetch sesh');
+        if (isEmpty(props.user)) {
+            console.log('user is empty');
+        } else {
+            console.log('fetchCalled');
+            message_list = [];
+            localStorage.setItem('maxScrollHeight', 0);
+            localStorage.setItem('fetchForScroll', false);
+            fetchMessage(props.owner.email, props.user.email);
+            console.log('fetch sesh');
+        }
     }, [props.user])
 
     /*if (isEmpty(props.user) && isEmpty(messageList)) {
         return <p>...</p>
     }*/
+
+    const showChatBox = (
+        <div>
+            {
+                
+                (isLoading === true)
+                    ? <div style={{textAlign: 'center'}}><CircularProgress/></div>
+                    : <ChatBox 
+                        messageList = { message_list }
+                        owner = { props.owner }
+                        user = { props.user }
+                        handleScroll = { fetchMessage }
+                    />
+            }
+        </div>
+    );
 
     return (
         <div className={classes.root}>
@@ -160,11 +187,7 @@ export default function Chat(props) {
                     xs={12} 
                     style={{paddingLeft: "16px"}}
                 >
-                    <ChatBox 
-                        messageList = { message_list }
-                        owner = { props.owner }
-                        user = { props.user }
-                    />
+                   {showChatBox}
                 </Grid>
                 <Grid 
                     container 
@@ -198,12 +221,37 @@ export default function Chat(props) {
 }
 
 function ChatBox(props) {
+    let maxScrollHeight = 0;
+
     useEffect(() => {
         const chatContainer = document.getElementById("chatBox");
         if (chatContainer) {
-            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            if (localStorage.getItem('fetchForScroll') === false) {
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            } else {
+                const previousMaxHeight = localStorage.getItem('maxScrollHeight');
+                chatContainer.scrollTop = chatContainer.scrollHeight;// It will give max scroll position
+                maxScrollHeight = chatContainer.scrollTop;
+                localStorage.setItem('maxScrollHeight', maxScrollHeight);
+                chatContainer.scrollTop = chatContainer.scrollTop - previousMaxHeight;
+            }  
         }
-    });
+    }, [props.messageList]);
+
+    function handleScroll(e) {
+        let element = e.target
+        if (element.scrollTop > maxScrollHeight) {
+            maxScrollHeight = element.scrollTop;
+            localStorage.setItem('maxScrollHeight', maxScrollHeight);
+        }
+
+        if (element.scrollTop === 0) {
+            console.log('scrolled to top');
+            localStorage.setItem('fetchForScroll', true);
+            props.handleScroll(props.owner.email, props.user.email);
+        }
+    }
 
     function filterMessageList() {
         const messageList = [];
@@ -216,7 +264,7 @@ function ChatBox(props) {
         return messageList;
     }
 
-    if(isEmpty(props.user)) {
+    if(isEmpty(props.user) || props.messageList.length === 0) {
         return(
             <p></p>
         );
@@ -230,7 +278,8 @@ function ChatBox(props) {
                 container 
                 direction="col"
                 style={{maxHeight: '80vh', overflow: 'auto'}}
-                spacing={2}    
+                spacing={2} 
+                onScroll={handleScroll}   
             >
                 {/* <React.Fragment> */}
                     {
