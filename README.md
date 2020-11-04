@@ -1,4 +1,8 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This is a sample chat application for browser. Currently only one-to-one chat is supported. I am still working on this project
+
+## Backend Link
+You will get back end code for this project
+[https://github.com/sujon13/Messenger-backend](https://github.com/sujon13/Messenger-backend)
 
 ## Available Scripts
 
