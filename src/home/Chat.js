@@ -37,6 +37,7 @@ export default function Chat(props) {
     const [messageList, setMessageList] = useState([]);
     const [updateMessage, setUpdateMessage] = useState(false);
     const [loadMessage, setLoadMessage] = useState(Date.now());
+    const[newMessage, setNewMessage] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
 
@@ -63,6 +64,7 @@ export default function Chat(props) {
         message_list.push(message);
         //setUpdateMessage(1 - updateMessage);
         setLoadMessage(Date.now());
+        setNewMessage(true);
         console.log('message saved');
     }
 
@@ -126,6 +128,9 @@ export default function Chat(props) {
                 //setMessageList([...response.data]);
                 message_list = [...response.data, ...message_list];
                 setLoadMessage(Date.now());
+                if (response.data.length === 0) {
+                    localStorage.setItem('noMoreData', 'true');
+                }
                 console.log(message_list.length);
                 //setPageForUserList(pageForUserList + 1);
                 setIsLoading(false);
@@ -146,7 +151,8 @@ export default function Chat(props) {
             console.log('fetchCalled');
             message_list = [];
             localStorage.setItem('maxScrollHeight', 0);
-            localStorage.setItem('fetchForScroll', false);
+            localStorage.setItem('fetchForScroll', 'false');
+            localStorage.setItem('noMoreData', 'false');
             fetchMessage(props.owner.email, props.user.email);
             console.log('fetch sesh');
         }
@@ -167,7 +173,8 @@ export default function Chat(props) {
                         owner = { props.owner }
                         user = { props.user }
                         handleScroll = { fetchMessage }
-                    />
+                        newMessage = { newMessage }
+                    />  
             }
         </div>
     );
@@ -227,7 +234,7 @@ function ChatBox(props) {
         const chatContainer = document.getElementById("chatBox");
         if (chatContainer) {
 
-            if (localStorage.getItem('fetchForScroll') === false) {
+            if (localStorage.getItem('fetchForScroll') === 'false' || props.newMessage === true) {
                 chatContainer.scrollTop = chatContainer.scrollHeight;
             } else {
                 const previousMaxHeight = localStorage.getItem('maxScrollHeight');
@@ -235,9 +242,14 @@ function ChatBox(props) {
                 maxScrollHeight = chatContainer.scrollTop;
                 localStorage.setItem('maxScrollHeight', maxScrollHeight);
                 chatContainer.scrollTop = chatContainer.scrollTop - previousMaxHeight;
+
+                // handling no more data
+                if (localStorage.getItem('noMoreData') === 'true') {
+                    chatContainer.scrollTop = 0;
+                }
             }  
         }
-    }, [props.messageList]);
+    });
 
     function handleScroll(e) {
         let element = e.target
@@ -245,10 +257,15 @@ function ChatBox(props) {
             maxScrollHeight = element.scrollTop;
             localStorage.setItem('maxScrollHeight', maxScrollHeight);
         }
+        // It has no more value to fetch
+        if (localStorage.getItem('noMoreData') === 'true') {
+            console.log('no more data');
+            return;
+        }
 
         if (element.scrollTop === 0) {
             console.log('scrolled to top');
-            localStorage.setItem('fetchForScroll', true);
+            localStorage.setItem('fetchForScroll', 'true');
             props.handleScroll(props.owner.email, props.user.email);
         }
     }
