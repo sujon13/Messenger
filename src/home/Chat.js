@@ -10,11 +10,15 @@ import Button from '@material-ui/core/Button';
 import Icon from '@material-ui/core/Icon';
 import IconButton from '@material-ui/core/IconButton';
 import SendIcon from '@material-ui/icons/Send';
+import Tooltip from '@material-ui/core/Tooltip';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import ChatTopBar from './ChatNavbar';
 import socketIOClient from "socket.io-client";
 import axios from 'axios';
 import {isEmpty} from "lodash";
+import moment from 'moment';
+import { isSameDate, formatTime } from '../util';
+import { DateRangeOutlined } from '@material-ui/icons';
 //const ENDPOINT = "http://15aa11984e70.ngrok.io";
 const ENDPOINT = 'http://localhost:4001';
 const socket = socketIOClient(ENDPOINT);
@@ -98,6 +102,13 @@ export default function Chat(props) {
             }    
         });
 
+        socket.on('heart-bit', (data) => {
+            console.log(data);
+            if (data.to === props.owner.email) {
+                saveMessage(data);
+            }    
+        });
+
         setInterval(() => {
             socket.emit('heart-bit', props.owner.email);
         }, 20000);
@@ -168,7 +179,7 @@ export default function Chat(props) {
             {
                 
                 (isLoading === true)
-                    ? <div style={{textAlign: 'center'}}><CircularProgress/></div>
+                    ? <div style={{textAlign: 'center', paddingTop: '30%'}}><CircularProgress/></div>
                     : <ChatBox 
                         messageList = { message_list }
                         owner = { props.owner }
@@ -188,7 +199,7 @@ export default function Chat(props) {
                 spacing={1}
             >
                 <Grid item xs={12}>
-                    <ChatTopBar user={props.user}/>
+                    <ChatTopBar user={props.user} userStatus = { props.userStatus }/>
                 </Grid>
                 <Grid 
                     item 
@@ -273,10 +284,17 @@ function ChatBox(props) {
 
     function filterMessageList() {
         const messageList = [];
+        let previousDate = null;
         for(const message of props.messageList) {
             if ((message.from === props.owner.email && message.to === props.user.email) 
             || (message.from === props.user.email && message.to === props.owner.email) ) {
+                if (previousDate === null) {
+                    messageList.push({...message, printDate: true});
+                } else if(isSameDate(new Date(previousDate), new Date(message.time)) === false) {
+                    messageList.push({...message, printDate: true});
+                }
                 messageList.push(message);
+                previousDate = message.time;
             }
         }
         return messageList;
@@ -287,10 +305,16 @@ function ChatBox(props) {
             <p></p>
         );
     }
+    const showDate = (date) => {
+        return (
+            <div style={{textAlign: 'center'}}>
+                {formatTime(date, true)}
+            </div>
+        )
+    }
 
     return (
         <div>
-            { console.log(props.messageList.length)}
             <Grid 
                 id='chatBox'
                 container 
@@ -304,13 +328,26 @@ function ChatBox(props) {
                         filterMessageList().map((message, index) => 
                             <Grid key={index.toString()} item xs={12}>
                                 {
+                                    message.printDate === true? showDate(message.time):
                                     message.from !== props.owner.email
                                         ? (
                                             <Box 
                                                 display="flex"
                                                 justifyContent="flex-start"
+                                                style={{width: '50%'}}
                                             >   
-                                                <Box>{message.text}</Box>
+                                                <Tooltip title={formatTime(message.time)} placement="left">
+                                                    <Box 
+                                                        style={{
+                                                            backgroundColor: '#E8E8E8', 
+                                                            borderStyle: 'hidden', 
+                                                            padding: '8px',
+                                                            borderRadius: '5px'
+                                                        }}
+                                                    >
+                                                        {message.text}    
+                                                    </Box>
+                                                </Tooltip>
                                             </Box>
                                         )  : (
                                             <Box 
@@ -318,7 +355,20 @@ function ChatBox(props) {
                                                 justifyContent="flex-end"
                                                 style={{marginRight: '32px'}}
                                             >   
-                                                <Box>{message.text}</Box>
+                                                <Tooltip title={formatTime(message.time)} placement="left">
+                                                    <Box
+                                                        style={{
+                                                            color: 'white',
+                                                            backgroundColor: '#0052cc', 
+                                                            borderStyle: 'hidden', 
+                                                            padding: '8px',
+                                                            borderRadius: '5px',
+                                                            maxWidth: '50%',
+                                                        }}
+                                                    >
+                                                        {message.text}
+                                                    </Box>
+                                                </Tooltip>
                                             </Box>
                                         )                  
                                 }

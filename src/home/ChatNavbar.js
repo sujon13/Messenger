@@ -6,6 +6,8 @@ import IconButton from '@material-ui/core/IconButton';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import { Avatar } from '@material-ui/core';
+import {isEmpty} from "lodash";
+import { lastActive } from '../util';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -23,24 +25,36 @@ const useStyles = makeStyles((theme) => ({
     },
     title: {
         flexGrow: 1,
-        textAlign: 'left'
+        textAlign: 'left',
+        fontWeight: 'bold'
     },
 }));
 
 export default function ChatTopBar(props) {
     const classes = useStyles();
 
+    if (isEmpty(props.user)) {
+        return <p></p>
+    }
+
     return (
         <div className={classes.root}>
             <Paper className={classes.paper} elevation={1}>
                 <Grid container direction="row">
-                    <Grid item xs={2}>
+                    <Grid item xs={1}>
                         <Avatar alt={props.user.name} src={props.user.profilePic}/>
                     </Grid>
-                    <Grid item xs={6}>
-                        <Typography className={classes.title}>
-                            {props.user.name}
-                        </Typography>
+                    <Grid container item xs={10} direction='col'> 
+                        <Grid item xs={11}>
+                            <Typography className={classes.title}>
+                                {props.user.name}
+                            </Typography>
+                        </Grid>
+                        <Grid item xs={12}>
+                            <Typography style={{fontSize: '12px'}}>
+                                { props.userStatus.length > 0 ? lastActive(props.userStatus, props.user): ''}
+                            </Typography>
+                        </Grid>
                     </Grid>
                 </Grid>
             </Paper>

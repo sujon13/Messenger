@@ -56,6 +56,7 @@ export default function Home(props) {
     const [userListScrollIsLoading, setUserListScrollIsLoading] = useState(false);
     const [error, setError] = useState('');
     const [pageForUserList, setPageForUserList] = useState(1);
+    const [userStatus, setUserStatus] = useState([]);
 
     function handleUser(user) {
         setUser(user);
@@ -88,6 +89,32 @@ export default function Home(props) {
         });
         return newUserList;
     }
+
+    useEffect(() => {
+        const interval = setInterval(async () => {
+            const baseUrl = 'http://localhost:4001/api/v1';
+            const option = {
+                method: 'GET',
+                url: `${baseUrl}/status`,
+                params: {
+                    page: pageForUserList,
+                    limit: 15
+                }
+            };
+            try {
+                const response = await axios(option);
+                if (response.data) {
+                    console.log('updated status received ');
+                    setUserStatus([...response.data]);
+                }
+            } catch(error) {
+                console.log(error);
+            }
+        }, 2000);
+
+        return () => clearInterval(interval);
+
+    }, [])
 
     const fetchUsers = async (accessToken, owner) => {
         console.log(accessToken);
@@ -194,6 +221,7 @@ export default function Home(props) {
                                             handleUser = { handleUser }
                                             userList = { userList }
                                             owner = {owner}
+                                            userStatus = { userStatus }
                                           /> 
                                         : ( 
                                             <Grid container direction='col'>
@@ -201,6 +229,7 @@ export default function Home(props) {
                                                     <UserList 
                                                         handleUser={ handleUser }
                                                         userList={ userList }
+                                                        userStatus = { userStatus }
                                                     />
                                                 </Grid>
                                                 <Grid item xs={12}>
@@ -220,7 +249,7 @@ export default function Home(props) {
                         // (isEmpty(user) === false)
                         //     ? <Chat user = {user} owner = {owner}/>
                         //     : <div style={{textAlign: 'center'}}>Start Chatting</div>
-                    }   <Chat user = {user} owner = {owner}/>  
+                    }   <Chat user = {user} owner = {owner} userStatus = { userStatus }/>  
                 </Grid>
             </Grid>
         </div>

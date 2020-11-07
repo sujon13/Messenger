@@ -9,6 +9,7 @@ import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import Divider from '@material-ui/core/Divider';
 import { Avatar } from '@material-ui/core';
+import Badge from '@material-ui/core/Badge';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import image1 from './../static/images/image1.jpg';
 import profile2 from './../static/images/profile2.jpg';
@@ -18,6 +19,8 @@ import profile5 from './../static/images/profile5.png';
 import axios from 'axios';
 import {isEmpty} from "lodash"
 import moment from 'moment';
+import { lastActive } from '../util';
+import BadgeAvatar from './Avator';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -57,7 +60,6 @@ function Message(props) {
         } 
 
         const timeDifference = (Date.now() - chatDate.getTime()) / ( 24 * 60 * 60 * 1000);
-        console.log('time difference: ', timeDifference);
 
         if (timeDifference < 7) {
             return time.format('dddd');
@@ -68,16 +70,20 @@ function Message(props) {
         }
         return time.format('MMM D YYYY');
     }
+
     return (
         <Grid container>
-            <Grid item xs={7}>
+            <Grid item xs={9}>
                 <Typography 
                     variant="subtitle2"  
                 >
-                    { props.message.text }
+                    { props.message.text.length <= 30
+                        ? props.message.text
+                        : props.message.text.substr(0, 30) + '...'
+                    }
                 </Typography>
             </Grid>
-            <Grid item xs={5}>
+            <Grid item xs={3}>
                 <Typography 
                     variant="subtitle2"  
                 >
@@ -102,20 +108,46 @@ export default function ChatList(props) {
         return userList[0];
     }
 
+    function isActive(user) {
+        if (props.userStatus.length === 0) {
+            return false;
+        }
+        const status = lastActive(props.userStatus, user);
+        console.log(status);
+        return status === 'Active now';
+    }
+
+    function addActiveStatusToChatList() {
+        return chatList.map((chat) => {
+            return {
+                ...chat,
+                activeStatus: isActive(chat.to)
+            }
+        });
+    }
+
+    useEffect(() => {
+        console.log(props.userStatus);
+        console.log(chatList);
+        const newList = addActiveStatusToChatList();
+        console.log(newList);
+        setChatList([...newList]);
+    }, [props.userStatus]);
+
     function addUserToChatList (chatList) {
         return chatList.map((chat) => {
             if (chat.to === props.owner.email) {
                 const user = getUser(chat.from);
                 return {
                     ...chat,
-                    to: user
+                    to: user,
                 }
             } else {
                 const user = getUser(chat.to);
                 return {
                     ...chat,
                     text: 'You: ' + chat.text,
-                    to: user
+                    to: user,
                 }
             }
         });
@@ -161,9 +193,6 @@ export default function ChatList(props) {
 
     useEffect(() => {
         if ( 
-            props.owner === undefined ||
-            props.userList === undefined ||
-            isEmpty(props.owner) ||
             props.userList.length === 0
         ) {
             console.log('no fetch');
@@ -171,7 +200,7 @@ export default function ChatList(props) {
         }
         console.log('fetch last messages start');
         fetchMessages();
-    }, [props.userList, props.owner]);
+    }, [props.userList]);
 
     if (isLoading) {
         return (
@@ -192,13 +221,18 @@ export default function ChatList(props) {
                                     item 
                                     direction="row" 
                                     className={classes.list}
-                                    //onClick={() => { props.handleUser(user)}}
+                                    onClick={() => { props.handleUser(chat.to)}}// It will show details chat
                                 >
-                                    <Grid item xs={2}> 
-                                        <Avatar 
-                                            alt={''} 
-                                            src={''}
-                                        />
+                                    <Grid 
+                                        item xs={2} 
+                                    > 
+                                        { chat.activeStatus === true
+                                            ? <BadgeAvatar src = {chat.to}/>
+                                            : <Avatar
+                                                alt={chat.to.name}
+                                                src={chat.to.name}
+                                              />
+                                        }
                                     </Grid>
                                     <Grid item container direction="col" xs={10}>
                                         <Grid item xs={12}>
