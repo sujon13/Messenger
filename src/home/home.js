@@ -110,11 +110,11 @@ export default function Home(props) {
             } catch(error) {
                 console.log(error);
             }
-        }, 2000);
+        }, 5000);
 
         return () => clearInterval(interval);
 
-    }, [])
+    }, []);
 
     const fetchUsers = async (accessToken, owner) => {
         console.log(accessToken);
@@ -249,7 +249,11 @@ export default function Home(props) {
                         // (isEmpty(user) === false)
                         //     ? <Chat user = {user} owner = {owner}/>
                         //     : <div style={{textAlign: 'center'}}>Start Chatting</div>
-                    }   <Chat user = {user} owner = {owner} userStatus = { userStatus }/>  
+                    }   <Chat 
+                            user = {user} 
+                            owner = {owner} 
+                            userStatus = { userStatus }
+                        />  
                 </Grid>
             </Grid>
         </div>

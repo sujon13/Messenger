@@ -44,6 +44,7 @@ export default function Chat(props) {
     const[newMessage, setNewMessage] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
+    const[statusUpdated, setStatusUpdated] = useState(false);
 
     function handleSendMessage(e) {
         e.preventDefault();
@@ -146,6 +147,7 @@ export default function Chat(props) {
                 console.log(message_list.length);
                 //setPageForUserList(pageForUserList + 1);
                 setIsLoading(false);
+                setStatusUpdated(false);
             }
         } catch(error) {
             console.log(error);
@@ -168,7 +170,13 @@ export default function Chat(props) {
             fetchMessage(props.owner.email, props.user.email);
             console.log('fetch sesh');
         }
-    }, [props.user])
+    }, [props.user]);
+
+    useEffect(() => {
+        if (message_list.length > 0){
+            setStatusUpdated(true);
+        }
+    });
 
     /*if (isEmpty(props.user) && isEmpty(messageList)) {
         return <p>...</p>
@@ -186,6 +194,7 @@ export default function Chat(props) {
                         user = { props.user }
                         handleScroll = { fetchMessage }
                         newMessage = { newMessage }
+                        statusUpdated = {statusUpdated}
                     />  
             }
         </div>
@@ -245,8 +254,11 @@ function ChatBox(props) {
     useEffect(() => {
         const chatContainer = document.getElementById("chatBox");
         if (chatContainer) {
+            console.log(props.statusUpdated);
 
-            if (localStorage.getItem('fetchForScroll') === 'false' || props.newMessage === true) {
+            if (props.statusUpdated === true) {
+                console.log('status updated but scroll position should not change');
+            } else if (localStorage.getItem('fetchForScroll') === 'false' || props.newMessage === true) {
                 chatContainer.scrollTop = chatContainer.scrollHeight;
             } else {
                 const previousMaxHeight = localStorage.getItem('maxScrollHeight');
