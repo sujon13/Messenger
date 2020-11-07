@@ -115,7 +115,7 @@ export default function Home(props) {
                 
                 const newUserList = userList.concat(currentUserList);
                 console.log(newUserList.length);
-                setUserList(newUserList);
+                setUserList([...newUserList]);
                 setPageForUserList(pageForUserList + 1);
                 setUserListScrollIsLoading(false);
             }
@@ -138,7 +138,7 @@ export default function Home(props) {
         fetchUsers(data.accessToken, profile);
     },[]);
 
-    if(isEmpty(owner)) {
+    if(isEmpty(owner) || owner === undefined) {
         return(
             <p></p>
         );
@@ -190,7 +190,11 @@ export default function Home(props) {
                                 : error !== ''
                                     ? <p>Error!!</p>
                                     : isChatShown === true 
-                                        ? <ChatList handleUser = { handleUser }/> 
+                                        ? <ChatList 
+                                            handleUser = { handleUser }
+                                            userList = { userList }
+                                            owner = {owner}
+                                          /> 
                                         : ( 
                                             <Grid container direction='col'>
                                                 <Grid item xs={12}>

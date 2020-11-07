@@ -91,10 +91,11 @@ export default function Chat(props) {
         });
 
         socket.on('chat', (data) => {
-            console.log('list length: ', messageList.length);
+            console.log('message received');
             console.log(data);
-            saveMessage(data);
-            
+            if (data.to === props.owner.email) {
+                saveMessage(data);
+            }    
         });
 
         setInterval(() => {
