@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
+import axios from 'axios';
 import { Avatar } from '@material-ui/core';
 import {isEmpty} from "lodash";
 import { lastActive } from '../util';
@@ -33,13 +34,45 @@ const useStyles = makeStyles((theme) => ({
 export default function ChatTopBar(props) {
     const classes = useStyles();
 
+    const [lastSeen, setLastSeen] = useState('');
+
+    useEffect(() => {
+        const interval = setInterval(async () => {
+            const baseUrl = 'http://localhost:4001/api/v1';
+            const option = {
+                method: 'GET',
+                url: `${baseUrl}/status/`,
+            };
+            try {
+                const response = await axios(option);
+                if (response.data) {
+                    //console.log('updated status received ', props.user);
+                    const activeStatus = lastActive(response.data, props.user);
+                    setLastSeen(activeStatus);
+                    
+                }
+            } catch(error) {
+                console.log(error);
+            }
+        }, 1000);
+
+        return () =>  {
+            setLastSeen('');
+            clearInterval(interval);
+        }
+
+    }, [props.user]);
+
     if (isEmpty(props.user)) {
         return <p></p>
     }
 
     return (
         <div className={classes.root}>
-            <Paper className={classes.paper} elevation={1}>
+            <Paper 
+                className={classes.paper} 
+                elevation={1}
+            >
                 <Grid container direction="row">
                     <Grid item xs={1}>
                         <Avatar alt={props.user.name} src={props.user.profilePic}/>
@@ -52,7 +85,7 @@ export default function ChatTopBar(props) {
                         </Grid>
                         <Grid item xs={12}>
                             <Typography style={{fontSize: '12px'}}>
-                                { props.userStatus.length > 0 ? lastActive(props.userStatus, props.user): ''}
+                                { lastSeen }
                             </Typography>
                         </Grid>
                     </Grid>

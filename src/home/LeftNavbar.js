@@ -35,7 +35,10 @@ export default function LeftTopBar(props) {
 
     return (
         <div className={classes.root}>
-            <Paper className={classes.paper} elevation={1}>
+            <Paper 
+                className={classes.paper} 
+                elevation={1}
+            >
                 <Grid container direction="row">
                     <Grid item xs={4}>
                         <Tooltip title={props.user.name} placement="right">

@@ -17,7 +17,7 @@ import profile3 from './../static/images/profile3.jpg';
 import profile4 from './../static/images/profile4.jpg';
 import profile5 from './../static/images/profile5.png';
 import axios from 'axios';
-import {isEmpty} from "lodash"
+import {isEmpty, isEqual } from "lodash"
 import moment from 'moment';
 import { lastActive } from '../util';
 import BadgeAvatar from './Avator';
@@ -72,7 +72,9 @@ function Message(props) {
     }
 
     return (
-        <Grid container>
+        <Grid 
+            container
+        >
             <Grid item xs={9}>
                 <Typography 
                     variant="subtitle2"  
@@ -96,10 +98,12 @@ function Message(props) {
 
 export default function ChatList(props) {
     const classes = useStyles();
+    let localChatList = [];
 
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const [chatList, setChatList] = useState([]);
+    const [userStatus, setUserStatus] = useState([]);
 
     function getUser(email) {
         const userList = props.userList.filter((user) => {
@@ -109,11 +113,11 @@ export default function ChatList(props) {
     }
 
     function isActive(user) {
-        if (props.userStatus.length === 0) {
+        if (userStatus.length === 0) {
             return false;
         }
-        const status = lastActive(props.userStatus, user);
-        console.log(status);
+        const status = lastActive(userStatus, user);
+        //console.log(status);
         return status === 'Active now';
     }
 
@@ -127,12 +131,33 @@ export default function ChatList(props) {
     }
 
     useEffect(() => {
-        console.log(props.userStatus);
-        console.log(chatList);
+        if (userStatus.length === 0) {
+            return;
+        }
         const newList = addActiveStatusToChatList();
-        console.log(newList);
         setChatList([...newList]);
-    }, [props.userStatus]);
+    }, [userStatus]);
+
+    useEffect(() => {
+        const interval = setInterval(async () => {
+            const baseUrl = 'http://localhost:4001/api/v1';
+            const option = {
+                method: 'GET',
+                url: `${baseUrl}/status`,
+            };
+            try {
+                const response = await axios(option);
+                if (response.data) {
+                    setUserStatus([...response.data]);
+                }
+            } catch(error) {
+                console.log(error);
+            }
+        }, 1000);
+
+        return () => clearInterval(interval);
+
+    }, []);
 
     function addUserToChatList (chatList) {
         return chatList.map((chat) => {
@@ -153,7 +178,7 @@ export default function ChatList(props) {
         });
     }
 
-    const fetchMessages = async (from, to) => {
+    const fetchMessages = async (prevChatList) => {
         const option = {
             method: 'GET',
             url: 'http://localhost:4001/api/v1/lastMessages',
@@ -164,42 +189,37 @@ export default function ChatList(props) {
             }
         };
         console.log(option);
-        setIsLoading(true);
-        setError('');
+        //setIsLoading(true);
+        //setError('');
         try {
             const response = await axios(option);
             if (response.data) {
-                console.log(response.data);
-                console.log(getUser(response.data[0].to));
                 const modifiedChatList = addUserToChatList(response.data);
-                console.log(modifiedChatList);
-                setChatList([...modifiedChatList]);
-                //message_list = [...response.data, ...message_list];
-                //setLoadMessage(Date.now());
-                if (response.data.length === 0) {
-                    localStorage.setItem('noMoreData', 'true');
+                if (isEqual(localChatList, modifiedChatList)) {
+                    console.log('no update for recent messages');
+                } else {
+                    localChatList = modifiedChatList;
+                    setChatList([...modifiedChatList]);
                 }
-                //setPageForUserList(pageForUserList + 1);
-                setIsLoading(false);
+                //setIsLoading(false);
             }
         } catch(error) {
             console.log(error);
             if(error.response) {
-                setError('something went wrong!');
+                //setError('something went wrong!');
             }
             setIsLoading(false);
         }
     }
 
     useEffect(() => {
-        if ( 
-            props.userList.length === 0
-        ) {
+        if (props.userList.length === 0) {
             console.log('no fetch');
             return;
         }
-        console.log('fetch last messages start');
-        fetchMessages();
+        const interval = setInterval(() => fetchMessages(props.chatList), 1000);
+
+        return () => clearInterval(interval);
     }, [props.userList]);
 
     if (isLoading) {

@@ -41,10 +41,10 @@ export default function Chat(props) {
     const [messageList, setMessageList] = useState([]);
     const [updateMessage, setUpdateMessage] = useState(false);
     const [loadMessage, setLoadMessage] = useState(Date.now());
-    const[newMessage, setNewMessage] = useState(false);
+    const[messageSent, setMessageSent] = useState(false);
+    const [messageGot, setMessageGot] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
-    const[statusUpdated, setStatusUpdated] = useState(false);
 
     function handleSendMessage(e) {
         e.preventDefault();
@@ -61,15 +61,14 @@ export default function Chat(props) {
         };
     
         sendMessageToCloud(messageObj);
+        setMessageSent(true);
         saveMessage(messageObj);
     }
 
     function saveMessage(message) {
         //setMessageList([...messageList, message]);
         message_list.push(message);
-        //setUpdateMessage(1 - updateMessage);
         setLoadMessage(Date.now());
-        setNewMessage(true);
         console.log('message saved');
     }
 
@@ -99,6 +98,7 @@ export default function Chat(props) {
             console.log('message received');
             console.log(data);
             if (data.to === props.owner.email) {
+                setMessageGot(true);
                 saveMessage(data);
             }    
         });
@@ -147,7 +147,6 @@ export default function Chat(props) {
                 console.log(message_list.length);
                 //setPageForUserList(pageForUserList + 1);
                 setIsLoading(false);
-                setStatusUpdated(false);
             }
         } catch(error) {
             console.log(error);
@@ -169,14 +168,13 @@ export default function Chat(props) {
             localStorage.setItem('noMoreData', 'false');
             fetchMessage(props.owner.email, props.user.email);
             console.log('fetch sesh');
+
+            return () => {
+                localStorage.setItem('fetchForScroll', 'false');
+                localStorage.setItem('noMoreData', 'false');
+            }
         }
     }, [props.user]);
-
-    useEffect(() => {
-        if (message_list.length > 0){
-            setStatusUpdated(true);
-        }
-    });
 
     /*if (isEmpty(props.user) && isEmpty(messageList)) {
         return <p>...</p>
@@ -187,15 +185,17 @@ export default function Chat(props) {
             {
                 
                 (isLoading === true)
-                    ? <div style={{textAlign: 'center', paddingTop: '30%'}}><CircularProgress/></div>
+                     ? <div style={{textAlign: 'center', paddingTop: '30%'}}><CircularProgress/></div>
                     : <ChatBox 
                         messageList = { message_list }
                         owner = { props.owner }
                         user = { props.user }
                         handleScroll = { fetchMessage }
-                        newMessage = { newMessage }
-                        statusUpdated = {statusUpdated}
-                    />  
+                        messageSent = { messageSent }
+                        resetMessageSent = {() => setMessageSent(false)}
+                        messageGot = {messageGot}
+                        resetMessageGot = {() => setMessageGot(false)}
+                    />
             }
         </div>
     );
@@ -208,19 +208,21 @@ export default function Chat(props) {
                 spacing={1}
             >
                 <Grid item xs={12}>
-                    <ChatTopBar user={props.user} userStatus = { props.userStatus }/>
+                    {
+                        isEmpty(props.user) ? '' : <ChatTopBar user={props.user}/>  
+                    }
                 </Grid>
                 <Grid 
                     item 
                     xs={12} 
-                    style={{paddingLeft: "16px"}}
+                    style={{paddingLeft: '16px'}}
                 >
                    {showChatBox}
                 </Grid>
                 <Grid 
                     container 
                     item xs={12}
-                    style={{ position: 'fixed', bottom: '0', paddingLeft: '16px', width: '68%'}}
+                    style={{ position: 'fixed', bottom: '0', paddingLeft: '16px', width: '67%'}}
                 >
                     <Grid item xs={11}>
                         <TextField 
@@ -254,13 +256,17 @@ function ChatBox(props) {
     useEffect(() => {
         const chatContainer = document.getElementById("chatBox");
         if (chatContainer) {
-            console.log(props.statusUpdated);
+            const fetchForScroll = localStorage.getItem('fetchForScroll');
+            //console.log(fetchForScroll);
+            console.log(props.messageGot);
 
-            if (props.statusUpdated === true) {
-                console.log('status updated but scroll position should not change');
-            } else if (localStorage.getItem('fetchForScroll') === 'false' || props.newMessage === true) {
+            if (props.messageSent === true || props.messageGot === true) {
                 chatContainer.scrollTop = chatContainer.scrollHeight;
-            } else {
+                props.resetMessageSent();
+                props.resetMessageGot();
+            } else if (fetchForScroll === 'false') {
+                chatContainer.scrollTop = chatContainer.scrollHeight;    
+            } else if (fetchForScroll === 'true') {
                 const previousMaxHeight = localStorage.getItem('maxScrollHeight');
                 chatContainer.scrollTop = chatContainer.scrollHeight;// It will give max scroll position
                 maxScrollHeight = chatContainer.scrollTop;
@@ -270,13 +276,18 @@ function ChatBox(props) {
                 // handling no more data
                 if (localStorage.getItem('noMoreData') === 'true') {
                     chatContainer.scrollTop = 0;
-                }
-            }  
+                } 
+            }
+        }
+
+        return () => {
+            props.resetMessageSent();
+            props.resetMessageGot();
         }
     });
 
     function handleScroll(e) {
-        let element = e.target
+        let element = e.target;
         if (element.scrollTop > maxScrollHeight) {
             maxScrollHeight = element.scrollTop;
             localStorage.setItem('maxScrollHeight', maxScrollHeight);
