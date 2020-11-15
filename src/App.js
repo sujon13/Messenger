@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import Signin from './authentication/Signin';
 import SignUp from './authentication/Signup';
 import Home from './home/home';
+import Profile from './profile/Account'
 
 import {
     BrowserRouter as Router,
@@ -9,8 +10,6 @@ import {
     Route,
     Link
 } from "react-router-dom";
-
-
 
 function App() {
     const [user, setUser] = useState({});
@@ -36,8 +35,11 @@ function App() {
                     <Route path="/" exact>
                         <SignUp />
                     </Route>
-                    <Route path="/home">
+                    <Route path="/home" exact>
                         <Home/>
+                    </Route>
+                    <Route path="/profile">
+                        <Profile/>
                     </Route>
                 </Switch>
             </div>

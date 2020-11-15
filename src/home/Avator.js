@@ -62,7 +62,13 @@ export default function BadgeAvatar(props) {
         }}
         variant="dot"
       >
-        <Avatar alt={props.src.name} src={props.src.name} />
+        <Avatar 
+            alt={props.src.name} 
+            src={props.src.profilePicUrl
+                ? `http://localhost:3001/${props.src.profilePicUrl}`
+                : props.src.name
+            } 
+        />
       </StyledBadge>
     </div>
   );

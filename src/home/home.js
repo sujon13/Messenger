@@ -5,6 +5,7 @@ import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import Paper from '@material-ui/core/Paper';
+import { useHistory } from "react-router-dom";
 import LeftTopBar from './LeftNavbar';
 import Chat from './Chat';
 import UserList from './UserList';
@@ -48,6 +49,8 @@ const useStyles = makeStyles((theme) => ({
 export default function Home(props) {
     const classes = useStyles();
 
+    const history = useHistory();
+
     const [isChatShown, setIsChatShown] = useState(true);
     const [user, setUser] = useState({});
     const [owner, setOwner] = useState({});
@@ -89,6 +92,14 @@ export default function Home(props) {
         return newUserList;
     }
 
+    const handleOwner = (owner, userList) => {
+        userList.map((user) => {
+            if (user.email === owner.email) {
+                setOwner(user);
+            }
+        })
+    }
+
     const fetchUsers = async (accessToken, owner) => {
         console.log(accessToken);
         const baseUrl = 'http://localhost:3001/api/v1';
@@ -110,9 +121,9 @@ export default function Home(props) {
             const response = await axios(option);
             if (response.data) {
                 console.log(response.data);
-                const currentUserList = filterUserList(owner, response.data);
-                console.log(userList.length);
+                handleOwner(owner, response.data);
                 
+                const currentUserList = filterUserList(owner, response.data);
                 const newUserList = userList.concat(currentUserList);
                 console.log(newUserList.length);
                 setUserList([...newUserList]);
@@ -129,13 +140,13 @@ export default function Home(props) {
     }
 
     useEffect(() => {
-        const data = window.history.state.state;
+        const data = history.location.state;
+        console.log(data);
         const profile = data.profile;
-        profile.profilePic = profile.name;
         localStorage.setItem(`token-${profile.email}`, data.accessToken);
+        localStorage.setItem(`userId-${profile.email}`, data.profile._id);
         setOwner(profile);
-       
-        fetchUsers(data.accessToken, profile);
+        fetchUsers(data.accessToken, profile);    
     },[]);
 
     if(isEmpty(owner) || owner === undefined) {
@@ -156,16 +167,24 @@ export default function Home(props) {
                         item xs={12}
                         style={{height: '40px', width: '33%', position: 'fixed', marginTop: '0px'}}
                     >
-                         <LeftTopBar user={owner}/>
+                         <LeftTopBar owner={owner}/>
                     </Grid>
                     <Grid 
                         container 
                         item xs={12} 
-                        style={{height: '40px', width: '33%', position: 'fixed', marginTop: '40px'}}
+                        style={{
+                            height: '40px', 
+                            width: '33%', 
+                            position: 'fixed', 
+                            marginTop: '42px',
+                            textAlign: 'center'
+                        }}
                     >
                         <Grid item xs={6}>
                             <Button
-                                variant="text"
+                                variant="contained"
+                                fullWidth
+                                color={isChatShown === true ? 'primary' : 'default'}
                                 onClick={() => setIsChatShown(true)}
                             >
                                 Chats
@@ -173,7 +192,9 @@ export default function Home(props) {
                         </Grid>
                         <Grid item xs={6}>
                             <Button 
-                                variant="text"
+                                variant="contained"
+                                fullWidth
+                                color={isChatShown === true ? 'default' : 'primary'}
                                 onClick={() => setIsChatShown(false)}
                             >
                                 All users

@@ -75,7 +75,13 @@ export default function ChatTopBar(props) {
             >
                 <Grid container direction="row">
                     <Grid item xs={1}>
-                        <Avatar alt={props.user.name} src={props.user.profilePic}/>
+                        <Avatar 
+                            alt={props.user.name} 
+                            src={props.user.profilePicUrl 
+                                ? `http://localhost:3001/${props.user.profilePicUrl}`
+                                : props.user.name
+                            }
+                        />
                     </Grid>
                     <Grid container item xs={10} direction='col'> 
                         <Grid item xs={11}>

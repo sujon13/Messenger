@@ -9,6 +9,7 @@ import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import Divider from '@material-ui/core/Divider';
 import { Avatar } from '@material-ui/core';
+import Box from '@material-ui/core/Box';
 import image1 from './../static/images/image1.jpg';
 import profile2 from './../static/images/profile2.jpg';
 import profile3 from './../static/images/profile3.jpg';
@@ -57,18 +58,30 @@ export default function UserList(props) {
                                     item 
                                     direction="row" 
                                     className={classes.list}
+                                    style={{backgroundColor: '#f2f2f2'}}
                                     onClick={() => { props.handleUser(user) }}
                                 >
                                     <Grid item xs={3}>
                                         <Avatar 
                                             alt={user.name} 
-                                            src={user.profilePic}
+                                            src={user.profilePicUrl 
+                                                ? `http://localhost:3001/${user.profilePicUrl}`
+                                                : user.name
+                                            }
                                         />
                                     </Grid>
-                                    <Grid item xs={9} style={{textAlign: 'left'}}>
-                                        <Typography variant="inherit" className={classes.title}>
-                                            {user.name}
-                                        </Typography>
+                                    <Grid 
+                                        item 
+                                        xs={9} 
+                                        style={{
+                                            margin: 'auto',
+                                        }}
+                                    >
+                                        <Box>
+                                            <Typography variant="inherit">
+                                                {user.name}
+                                            </Typography>
+                                        </Box>
                                     </Grid>
                                 </Grid>
                             )

@@ -109,6 +109,7 @@ export default function ChatList(props) {
         const userList = props.userList.filter((user) => {
             return user.email === email
         });
+        //console.log('user: ', userList[0]);
         return userList[0];
     }
 
@@ -219,7 +220,10 @@ export default function ChatList(props) {
         }
         const interval = setInterval(() => fetchMessages(props.chatList), 1000);
 
-        return () => clearInterval(interval);
+        return () =>  {
+            //setChatList([]);
+            clearInterval(interval);
+        }
     }, [props.userList]);
 
     if (isLoading) {
@@ -250,7 +254,10 @@ export default function ChatList(props) {
                                             ? <BadgeAvatar src = {chat.to}/>
                                             : <Avatar
                                                 alt={chat.to.name}
-                                                src={chat.to.name}
+                                                src={chat.to.profilePicUrl 
+                                                    ? `http://localhost:3001/${chat.to.profilePicUrl}`
+                                                    : chat.to.name
+                                                }
                                               />
                                         }
                                     </Grid>

@@ -17,7 +17,7 @@ import {
     Switch,
     Route,
     Link,
-    Redirect
+    useHistory
 } from "react-router-dom";
 import { TramOutlined } from '@material-ui/icons';
 
@@ -45,6 +45,8 @@ const useStyles = makeStyles((theme) => ({
     avatar: {
         margin: theme.spacing(1),
         backgroundColor: theme.palette.secondary.main,
+        width: theme.spacing(10),
+        height: theme.spacing(10),
     },
     form: {
         width: '100%', // Fix IE 11 issue.
@@ -58,13 +60,14 @@ const useStyles = makeStyles((theme) => ({
 export default function SignIn(props) {
     const classes = useStyles();
 
+    const history = useHistory();
+
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [hidden, setHidden] = useState(TramOutlined);
     const [user, setUser] = useState({});
-    const [redirect, setRedirect] = useState(false);
     const [data, setData] = useState({});
 
     async function handleSubmit(e) {
@@ -89,9 +92,8 @@ export default function SignIn(props) {
             if (response.data) {
                 console.log(response.data);
                 setData(response.data);
-                setRedirect(true); 
                 setIsLoading(false);
-                //window.location = `/home`;
+                history.push('/home', response.data);
             }
         } catch(error) {
             console.log(error);
@@ -104,17 +106,6 @@ export default function SignIn(props) {
 
     if (isLoading) {
         return <p>loading...</p>;
-    }
-
-    if(redirect) {
-        return (
-            <Redirect
-                to={{
-                    pathname: '/home',
-                    state: data
-                }}
-            />    
-        )
     }
 
     return (
@@ -155,10 +146,10 @@ export default function SignIn(props) {
                             <div style={{color: 'red'}}>{error}</div>
                         </Grid>
                     }
-                    <FormControlLabel
+                    {/* <FormControlLabel
                         control={<Checkbox value="remember" color="primary" />}
                         label="Remember me"
-                    />
+                    /> */}
                     <Button
                         type="submit"
                         fullWidth
@@ -170,12 +161,12 @@ export default function SignIn(props) {
                         Sign In
                     </Button>
                     <Grid container>
-                        <Grid item xs>
+                        {/* <Grid item xs>
                             <Link href="#" variant="body2">
                                 Forgot password?
                             </Link>
-                        </Grid>
-                        <Grid item>
+                        </Grid> */}
+                        <Grid item style={{margin: 'auto'}}>
                             <Link to="/signup" variant="body2">
                                 Don't have an account? Sign Up
                             </Link>

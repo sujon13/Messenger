@@ -200,6 +200,10 @@ export default function Chat(props) {
         </div>
     );
 
+    if (isEmpty(props.user)) {
+        return <p></p>
+    };
+
     return (
         <div className={classes.root}>
             <Grid 
@@ -222,13 +226,19 @@ export default function Chat(props) {
                 <Grid 
                     container 
                     item xs={12}
-                    style={{ position: 'fixed', bottom: '0', paddingLeft: '16px', width: '67%'}}
+                    style={{ 
+                        position: 'fixed', 
+                        bottom: '0', 
+                        paddingLeft: '16px',
+                        marginBottom: '5px', 
+                        width: '67%'
+                    }}
                 >
                     <Grid item xs={11}>
                         <TextField 
                             id="message" 
                             placeholder='Type a message' 
-                            variant="standard" 
+                            variant="outlined" 
                             fullWidth
                             autoComplete='off'
                             onKeyUp={handleMessageChange}
