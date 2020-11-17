@@ -1,6 +1,5 @@
 import moment from 'moment';
 
-
 export function isSameDate(date1, date2) {
     return (date1.getDay() === date2.getDay()) &&
            (date1.getMonth() === date2.getMonth()) && 
@@ -40,4 +39,23 @@ export function lastActive(userStatus, user) {
     const lastSeen = curUserStatus[0].lastSeen;
     const lastSeenFromNow = moment(lastSeen).fromNow();
     return 'Active ' + (lastSeenFromNow === 'a few seconds ago' ? 'now' : lastSeenFromNow);
+}
+
+export function hasInternetConnection(showAlert = false) {
+    if (navigator.onLine) {
+        return true;
+    } else {
+        const message = 'Please check your network connection';
+        console.log(message);
+        if (showAlert)alert(message);
+        return false;
+    }
+}
+
+export function isDigit(text) {
+    for(const letter of text) {
+        if (letter >= '0' && letter <= '9'){}
+        else return false;
+    }
+    return true;
 }

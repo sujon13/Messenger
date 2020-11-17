@@ -14,11 +14,11 @@ import Dialog from '@material-ui/core/Dialog';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { useTheme } from '@material-ui/core/styles';
+
 import { useHistory } from "react-router-dom";
 import axios from 'axios';
 import {isEmpty} from "lodash"
-import image1 from './../static/images/image1.jpg';
-
+import { Helmet } from 'react-helmet';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -113,121 +113,130 @@ export default function Profile(props) {
     
     if(isEmpty(profile) || profile === undefined) {
         return(
-            <p></p>
+            <div>
+                <Helmet>
+                    <title> My Profile</title>
+                </Helmet>
+            </div>
         );
     }
 
     return (
-        <Paper className={classes.paper} elevation={3}> 
-            <Grid 
-                container
-                direction="col"
-            >
-                <Grid   
-                    item
-                    xs={12}
+        <div>
+            <Helmet>
+                <title> My Profile</title>
+            </Helmet>
+            <Paper className={classes.paper} elevation={3}> 
+                <Grid 
+                    container
+                    direction="col"
                 >
-                    <Avatar 
-                        alt="Remy Sharp" 
-                        src={`http://localhost:3001/${profile.profilePicUrl}`} 
-                        className={classes.large}
+                    <Grid   
+                        item
+                        xs={12}
+                    >
+                        <Avatar 
+                            alt="Remy Sharp" 
+                            src={`http://localhost:3001/${profile.profilePicUrl}`} 
+                            className={classes.large}
+                            style={{
+                                display: 'block',
+                                marginLeft: 'auto',
+                                marginRight: 'auto'
+                            }}
+                        />
+                    </Grid>
+                    <Grid
+                        item
+                        xs={12}
+                        style={{textAlign: 'center'}}
+                    >
+                        <Typography 
+                            variant="h4"
+                            style={{
+                                fontWeight: 'bold',
+                                fontSize: '32px'
+                            }}
+                        >
+                            {profile.name}
+                        </Typography>
+                    </Grid>
+                    <Grid
+                        container
+                        item
+                        xs={12}
+                        direction='row'
                         style={{
-                            display: 'block',
-                            marginLeft: 'auto',
-                            marginRight: 'auto'
-                        }}
-                    />
-                </Grid>
-                <Grid
-                    item
-                    xs={12}
-                    style={{textAlign: 'center'}}
-                >
-                    <Typography 
-                        variant="h4"
-                        style={{
-                            fontWeight: 'bold',
-                            fontSize: '32px'
+                            textAlign: 'center',
+                            marginTop: '48px',
+                            height: '30px',
                         }}
                     >
-                        {profile.name}
-                    </Typography>
-                </Grid>
-                <Grid
-                    container
-                    item
-                    xs={12}
-                    direction='row'
-                    style={{
-                        textAlign: 'center',
-                        marginTop: '48px',
-                        height: '30px',
-                    }}
-                >
-                    <Grid 
-                        item 
-                        xs={3}
+                        <Grid 
+                            item 
+                            xs={3}
+                            style={{
+                                textAlign: 'center',
+                            }}
+                        >
+                            <Box 
+                                style={{
+                                    //backgroundColor: 'gray'
+                                }}
+                            >
+                                <EmailSharpIcon color='primary'/>
+                            </Box>
+                        </Grid>
+                        <Grid item xs={9}>
+                            <Typography 
+                                style={{
+                                    textAlign: 'left',
+                                }}
+                            >
+                                { profile.email }
+                            </Typography>
+                        </Grid>
+
+                    </Grid>
+                    <Grid
+                        container
+                        item
+                        xs={12}
+                        direction='row'
                         style={{
                             textAlign: 'center',
                         }}
                     >
-                        <Box 
-                            style={{
-                                //backgroundColor: 'gray'
-                            }}
-                        >
-                            <EmailSharpIcon color='primary'/>
-                        </Box>
+                        <Grid item xs={3} style={{textAlign: 'center'}}>
+                            <PhoneEnabledSharpIcon color='primary'/>
+                        </Grid>
+                        <Grid item xs={9}>
+                            <Typography 
+                                style={{
+                                    textAlign: 'left'
+                                }}
+                            >
+                                { profile.phoneNumber }
+                            </Typography>
+                        </Grid>
                     </Grid>
-                    <Grid item xs={9}>
-                        <Typography 
+                    <Grid item xs={12} style={{textAlign: 'center'}}>
+                        <Button 
+                            variant="contained" 
+                            color="primary"
                             style={{
-                                textAlign: 'left',
+                                width: '50%',
+                                marginTop: '10px'
                             }}
+                            onClick = {() => setOpen(true)}
                         >
-                            { profile.email }
-                        </Typography>
-                    </Grid>
-
-                </Grid>
-                <Grid
-                    container
-                    item
-                    xs={12}
-                    direction='row'
-                    style={{
-                        textAlign: 'center',
-                    }}
-                >
-                    <Grid item xs={3} style={{textAlign: 'center'}}>
-                        <PhoneEnabledSharpIcon color='primary'/>
-                    </Grid>
-                    <Grid item xs={9}>
-                        <Typography 
-                            style={{
-                                textAlign: 'left'
-                            }}
-                        >
-                            { profile.phoneNumber }
-                        </Typography>
+                            Edit
+                        </Button>
+                        <EditProfile profile={profile} open={open} onClose={handleClose} />
                     </Grid>
                 </Grid>
-                <Grid item xs={12} style={{textAlign: 'center'}}>
-                    <Button 
-                        variant="contained" 
-                        color="primary"
-                        style={{
-                            width: '50%',
-                            marginTop: '10px'
-                        }}
-                        onClick = {() => setOpen(true)}
-                    >
-                        Edit
-                    </Button>
-                    <EditProfile profile={profile} open={open} onClose={handleClose} />
-                </Grid>
-            </Grid>
-        </Paper>
+            </Paper>
+        </div>
     );
 }
 

@@ -10,16 +10,22 @@ import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
+
 import axios from 'axios';
+import { Helmet } from 'react-helmet';
 
 import {
     BrowserRouter as Router,
     Switch,
     Route,
     Link,
-    Redirect
+    Redirect,
+    useHistory,
 } from "react-router-dom";
+
 import Signin from './Signin';
+import EmailVerify from './EmailVerify';
+import { hasInternetConnection } from './../util';
 
 
 function Copyright() {
@@ -58,6 +64,8 @@ const useStyles = makeStyles((theme) => ({
 export default function SignUp() {
     const classes = useStyles();
 
+    const history = useHistory();
+
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [phoneNo, setPhoneNo] = useState('');
@@ -71,40 +79,65 @@ export default function SignUp() {
     const [password2Error, setPassword2Error] = useState('');
     const [error, setError] = useState('');
 
+    const clearAllError = () => {
+        setNameError('');
+        setEmailError('');
+        setPhoneNoError('');
+        setpasswordError('');
+        setError('');
+    }
+
     async function handleSubmit(e) {
         e.preventDefault();
-        setError('');
+        if (!hasInternetConnection(true))return;
+
+        clearAllError();
         if (isFormValid() === false) {
             return;
         }
 
         const baseUrl = 'http://localhost:3001/api/v1';
         //const baseUrl = 'http://f117216464b9.ngrok.io/api/v1';
+        const data = {
+            name: name,
+            email: email,
+            phoneNumber: phoneNo,
+            password: password
+        };
         const option = {
             method: 'post',
-            url: `${baseUrl}/users`,
-            data: {
-                name: name,
-                email: email,
-                phoneNumber: phoneNo,
-                password: password
-            }
+            url: `${baseUrl}/auth/account/verify`,
+            data: data,
         };
 
-        setPassword('');
-        setPassword2('');
         setIsLoading(true);
         try {
             const response = await axios(option);
-            if (response.data) {
-                window.location = '/signin';
+            if (response.status === 200) {
+                setIsLoading(false);
+                history.push('/signup/email-verify', data);
+                //window.location = '/signin';
             }
         } catch(error) {
             console.log(error);
             if(error.response.data) {
+                console.log(error.response.data);
+                findErrorFromResponse(error.response.data);
                 setError(error.response.data);
             }
             setIsLoading(false);
+        }
+    }
+
+    const findErrorFromResponse = (error) => {
+        if (error.search(/name/i) > -1) {
+            setNameError(error);
+        }
+        if (error.search(/email/i) > -1) {
+            setEmailError(error);
+        }
+        if (error.search(/phone/i) > -1) {
+            setPhoneNoError(error);
         }
     }
 
@@ -115,12 +148,12 @@ export default function SignUp() {
         }
 
         if (email === '') {
-            setEmailError('Email field in required');
+            setEmailError('Email field is required');
             return false;
         }
 
         if(phoneNo === '') {
-            setPhoneNoError('Phone number field in required');
+            setPhoneNoError('Phone number field is required');
             return false;
         }
 
@@ -137,13 +170,11 @@ export default function SignUp() {
         return true;
     }
 
-    if (isLoading) {
-        return <p>loading...</p>;
-    }
-
     return (
         <Container component="main" maxWidth="xs">
-
+            <Helmet>
+                <title>Sign Up</title>
+            </Helmet>
             <CssBaseline />
             <div className={classes.paper}>
                 <Typography component="h1" variant="h5">
@@ -221,6 +252,7 @@ export default function SignUp() {
                                 required
                                 error={passwordError !== ''}
                                 fullWidth
+                                value={password}
                                 name="password"
                                 label="Password"
                                 type="password"
@@ -242,6 +274,7 @@ export default function SignUp() {
                                 required
                                 error={password2Error !== ''}
                                 fullWidth
+                                value={password2}
                                 name="password2"
                                 label="Repeat your Password"
                                 type="password"
@@ -264,9 +297,12 @@ export default function SignUp() {
                             variant="contained"
                             color="primary"
                             className={classes.submit}
+                            style={{textTransform: 'none'}}
                             onClick={handleSubmit}
                         >
-                            Sign Up
+                            {
+                                isLoading ? 'Signing Up..' : 'Sign Up'
+                            }
                         </Button>
                     <Grid container justify="flex-end">
                         <Grid item>

@@ -2,7 +2,8 @@ import React, {useState} from 'react';
 import Signin from './authentication/Signin';
 import SignUp from './authentication/Signup';
 import Home from './home/home';
-import Profile from './profile/Account'
+import Profile from './profile/Account';
+import EmailVerify from './authentication/EmailVerify';
 
 import {
     BrowserRouter as Router,
@@ -29,8 +30,11 @@ function App() {
                     <Route path="/signin">
                         <Signin handleUser = {handleUser}/>
                     </Route>
-                    <Route path="/signup">
+                    <Route path="/signup" exact>
                         <SignUp />
+                    </Route>
+                    <Route path="/signup/email-verify">
+                        <EmailVerify/>
                     </Route>
                     <Route path="/" exact>
                         <SignUp />

@@ -5,14 +5,18 @@ import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import Paper from '@material-ui/core/Paper';
+import Snackbar from '@material-ui/core/Snackbar';
+
 import { useHistory } from "react-router-dom";
+import axios from 'axios';
+import {isEmpty} from "lodash";
+import { Helmet } from 'react-helmet';
+
 import LeftTopBar from './LeftNavbar';
 import Chat from './Chat';
 import UserList from './UserList';
 import ChatList from './ChatList';
-import axios from 'axios';
-import {isEmpty} from "lodash"
-
+import { hasInternetConnection } from './../util';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -59,6 +63,7 @@ export default function Home(props) {
     const [userListScrollIsLoading, setUserListScrollIsLoading] = useState(false);
     const [error, setError] = useState('');
     const [pageForUserList, setPageForUserList] = useState(1);
+    const [open, setOpen] = useState(false);// for snack bar
 
     function handleUser(user) {
         setUser(user);
@@ -101,7 +106,6 @@ export default function Home(props) {
     }
 
     const fetchUsers = async (accessToken, owner) => {
-        console.log(accessToken);
         const baseUrl = 'http://localhost:3001/api/v1';
         //const baseUrl = 'http://f117216464b9.ngrok.io/api/v1';
         const option = {
@@ -146,117 +150,141 @@ export default function Home(props) {
         localStorage.setItem(`token-${profile.email}`, data.accessToken);
         localStorage.setItem(`userId-${profile.email}`, data.profile._id);
         setOwner(profile);
+        if(!hasInternetConnection()) {
+            setOpen(true);
+            return;
+        }
         fetchUsers(data.accessToken, profile);    
     },[]);
 
     if(isEmpty(owner) || owner === undefined) {
         return(
-            <p></p>
+            <div>
+                <Helmet>
+                    <title> Easy Chat</title>
+                </Helmet>
+            </div>
         );
     }
 
     return (
-        <div className={classes.root}>
-            <Grid 
-                container 
-                direction="row" 
-                spacing={1}
-            >
-                <Grid container item direction="col" sm={4} spacing={1}>
-                    <Grid 
-                        item xs={12}
-                        style={{height: '40px', width: '33%', position: 'fixed', marginTop: '0px'}}
-                    >
-                         <LeftTopBar owner={owner}/>
-                    </Grid>
-                    <Grid 
-                        container 
-                        item xs={12} 
-                        style={{
-                            height: '40px', 
-                            width: '33%', 
-                            position: 'fixed', 
-                            marginTop: '42px',
-                            textAlign: 'center'
-                        }}
-                    >
-                        <Grid item xs={6}>
-                            <Button
-                                variant="contained"
-                                fullWidth
-                                color={isChatShown === true ? 'primary' : 'default'}
-                                onClick={() => setIsChatShown(true)}
-                            >
-                                Chats
-                            </Button>
+        <div>
+            <Helmet>
+                <title> Easy Chat</title>
+            </Helmet>
+            <Snackbar
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+                open={open}
+                onClose={() => setOpen(false)}
+                message="There is no internet connection! Please check your internet connection and try again"
+                autoHideDuration={2000}
+            />
+            <div className={classes.root}>
+                <Grid 
+                    container 
+                    direction="row" 
+                    spacing={1}
+                >
+                    <Grid container item direction="col" sm={4} spacing={1}>
+                        <Grid 
+                            item xs={12}
+                            style={{height: '40px', width: '33%', position: 'fixed', marginTop: '0px'}}
+                        >
+                            <LeftTopBar owner={owner}/>
                         </Grid>
-                        <Grid item xs={6}>
-                            <Button 
-                                variant="contained"
-                                fullWidth
-                                color={isChatShown === true ? 'default' : 'primary'}
-                                onClick={() => setIsChatShown(false)}
-                            >
-                                All users
-                            </Button>
+                        <Grid 
+                            container 
+                            item xs={12} 
+                            style={{
+                                height: '40px', 
+                                width: '33%', 
+                                position: 'fixed', 
+                                marginTop: '42px',
+                                textAlign: 'center'
+                            }}
+                        >
+                            <Grid item xs={6}>
+                                <Button
+                                    variant="contained"
+                                    fullWidth
+                                    style={{textTransform: 'none'}}
+                                    color={isChatShown === true ? 'primary' : 'default'}
+                                    onClick={() => setIsChatShown(true)}
+                                >
+                                    Chats
+                                </Button>
+                            </Grid>
+                            <Grid item xs={6}>
+                                <Button 
+                                    variant="contained"
+                                    fullWidth
+                                    style={{textTransform: 'none'}}
+                                    color={isChatShown === true ? 'default' : 'primary'}
+                                    onClick={() => setIsChatShown(false)}
+                                >
+                                    All Users
+                                </Button>
+                            </Grid>
                         </Grid>
-                    </Grid>
 
-                    <Grid 
-                        item 
-                        xs={12} 
-                        className={classes.list} 
-                        onScroll={handleScroll}
-                        style={{position: 'fixed', marginTop: '80px', width: '33%'}}
-                    >
+                        <Grid 
+                            item 
+                            xs={12} 
+                            className={classes.list} 
+                            onScroll={handleScroll}
+                            style={{position: 'fixed', marginTop: '80px', width: '33%'}}
+                        >
+                            {
+                                isLoading 
+                                    ? <p>Loading...</p> 
+                                    : error !== ''
+                                        ? <p>Error!!</p>
+                                        : isChatShown === true 
+                                            ? <ChatList 
+                                                handleUser = { handleUser }
+                                                userList = { userList }
+                                                owner = {owner}
+                                                needToShowChatBox = { isEmpty(user) }
+                                            /> 
+                                            : ( 
+                                                <Grid container direction='col'>
+                                                    <Grid 
+                                                        item 
+                                                        xs={12}
+                                                    >
+                                                        <UserList 
+                                                            handleUser={ handleUser }
+                                                            userList={ userList }
+                                                        />
+                                                    </Grid>
+                                                    <Grid 
+                                                        item 
+                                                        xs={12}
+                                                    >
+                                                        {
+                                                            userListScrollIsLoading 
+                                                            ? <p>loading..</p>
+                                                            : <p></p>
+                                                        }
+                                                    </Grid>
+                                                </Grid>
+                                            )
+                            }
+                        </Grid>
+                    </Grid>
+                    <Grid item sm={8}>
                         {
-                            isLoading 
-                                ? <p>Loading...</p> 
-                                : error !== ''
-                                    ? <p>Error!!</p>
-                                    : isChatShown === true 
-                                        ? <ChatList 
-                                            handleUser = { handleUser }
-                                            userList = { userList }
-                                            owner = {owner}
-                                          /> 
-                                        : ( 
-                                            <Grid container direction='col'>
-                                                <Grid 
-                                                    item 
-                                                    xs={12}
-                                                >
-                                                    <UserList 
-                                                        handleUser={ handleUser }
-                                                        userList={ userList }
-                                                    />
-                                                </Grid>
-                                                <Grid 
-                                                    item 
-                                                    xs={12}
-                                                >
-                                                    {
-                                                        userListScrollIsLoading 
-                                                        ? <p>loading..</p>
-                                                        : <p></p>
-                                                    }
-                                                </Grid>
-                                            </Grid>
-                                          )
-                        }
+                            // (isEmpty(user) === false)
+                            //     ? <Chat user = {user} owner = {owner}/>
+                            //     : <div style={{textAlign: 'center'}}>Start Chatting</div>
+                        }   <Chat 
+                                user = {user} 
+                                owner = {owner}
+                            />  
                     </Grid>
                 </Grid>
-                <Grid item sm={8}>
-                    {
-                        // (isEmpty(user) === false)
-                        //     ? <Chat user = {user} owner = {owner}/>
-                        //     : <div style={{textAlign: 'center'}}>Start Chatting</div>
-                    }   <Chat 
-                            user = {user} 
-                            owner = {owner}
-                        />  
-                </Grid>
-            </Grid>
+            </div>
         </div>
+        
     );
 }

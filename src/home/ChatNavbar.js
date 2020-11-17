@@ -5,9 +5,11 @@ import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
-import axios from 'axios';
 import { Avatar } from '@material-ui/core';
+
+import axios from 'axios';
 import {isEmpty} from "lodash";
+
 import { lastActive } from '../util';
 
 const useStyles = makeStyles((theme) => ({

@@ -10,8 +10,9 @@ import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
-import axios from 'axios';
 
+import axios from 'axios';
+import { Helmet } from 'react-helmet';
 import {
     BrowserRouter as Router,
     Switch,
@@ -19,7 +20,9 @@ import {
     Link,
     useHistory
 } from "react-router-dom";
-import { TramOutlined } from '@material-ui/icons';
+
+import chatIcon from './../static/images/chatIcon.png';
+import { hasInternetConnection } from './../util';
 
 
 function Copyright() {
@@ -43,10 +46,10 @@ const useStyles = makeStyles((theme) => ({
         alignItems: 'center',
     },
     avatar: {
-        margin: theme.spacing(1),
-        backgroundColor: theme.palette.secondary.main,
+        //backgroundColor: 'red',
         width: theme.spacing(10),
         height: theme.spacing(10),
+        margin: 'auto',
     },
     form: {
         width: '100%', // Fix IE 11 issue.
@@ -66,12 +69,12 @@ export default function SignIn(props) {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const [hidden, setHidden] = useState(TramOutlined);
     const [user, setUser] = useState({});
     const [data, setData] = useState({});
 
     async function handleSubmit(e) {
         e.preventDefault();
+        if (!hasInternetConnection(true))return;
         setError('');
         
         const baseUrl = 'http://localhost:3001/api/v1';
@@ -104,17 +107,14 @@ export default function SignIn(props) {
         }
     }
 
-    if (isLoading) {
-        return <p>loading...</p>;
-    }
-
     return (
         <Container component="main" maxWidth="xs">
+            <Helmet>
+                <title> Sign In</title>
+            </Helmet>
             <CssBaseline />
             <div className={classes.paper}>
-                <Avatar className={classes.avatar}>
-                    chat
-                </Avatar>
+                <Avatar className={classes.avatar} src={chatIcon}/>
                 <Typography component="h1" variant="h5">
                     Sign in
                 </Typography>
@@ -156,9 +156,12 @@ export default function SignIn(props) {
                         variant="contained"
                         color="primary"
                         className={classes.submit}
+                        style={{textTransform: 'none'}}
                         onClick={handleSubmit}
                     >
-                        Sign In
+                        {   
+                            isLoading ? 'Singing In..' : 'Sign In'
+                        }
                     </Button>
                     <Grid container>
                         {/* <Grid item xs>

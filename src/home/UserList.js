@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
@@ -10,11 +8,6 @@ import Grid from '@material-ui/core/Grid';
 import Divider from '@material-ui/core/Divider';
 import { Avatar } from '@material-ui/core';
 import Box from '@material-ui/core/Box';
-import image1 from './../static/images/image1.jpg';
-import profile2 from './../static/images/profile2.jpg';
-import profile3 from './../static/images/profile3.jpg';
-import profile4 from './../static/images/profile4.jpg';
-import profile5 from './../static/images/profile5.png';
 
 const useStyles = makeStyles((theme) => ({
     root: {

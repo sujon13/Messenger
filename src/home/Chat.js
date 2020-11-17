@@ -4,7 +4,6 @@ import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
-import BottomNavigation from '@material-ui/core/BottomNavigation';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import Icon from '@material-ui/core/Icon';
@@ -12,14 +11,15 @@ import IconButton from '@material-ui/core/IconButton';
 import SendIcon from '@material-ui/icons/Send';
 import Tooltip from '@material-ui/core/Tooltip';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import ChatTopBar from './ChatNavbar';
+
 import socketIOClient from "socket.io-client";
 import axios from 'axios';
 import {isEmpty} from "lodash";
 import moment from 'moment';
+
 import { isSameDate, formatTime } from '../util';
-import { DateRangeOutlined } from '@material-ui/icons';
-//const ENDPOINT = "http://15aa11984e70.ngrok.io";
+import ChatTopBar from './ChatNavbar';
+
 const ENDPOINT = 'http://localhost:4001';
 const socket = socketIOClient(ENDPOINT);
 

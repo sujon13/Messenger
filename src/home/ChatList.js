@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
@@ -11,16 +10,13 @@ import Divider from '@material-ui/core/Divider';
 import { Avatar } from '@material-ui/core';
 import Badge from '@material-ui/core/Badge';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import image1 from './../static/images/image1.jpg';
-import profile2 from './../static/images/profile2.jpg';
-import profile3 from './../static/images/profile3.jpg';
-import profile4 from './../static/images/profile4.jpg';
-import profile5 from './../static/images/profile5.png';
+
 import axios from 'axios';
 import {isEmpty, isEqual } from "lodash"
 import moment from 'moment';
-import { lastActive } from '../util';
 import BadgeAvatar from './Avator';
+
+import { lastActive } from '../util';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -201,6 +197,10 @@ export default function ChatList(props) {
                 } else {
                     localChatList = modifiedChatList;
                     setChatList([...modifiedChatList]);
+                    localStorage.setItem(`chatList-${props.owner.email}`, JSON.stringify(modifiedChatList));
+                    if (props.needToShowChatBox && modifiedChatList.length > 0)  {
+                        props.handleUser(modifiedChatList[0].to);
+                    }
                 }
                 //setIsLoading(false);
             }
@@ -225,6 +225,21 @@ export default function ChatList(props) {
             clearInterval(interval);
         }
     }, [props.userList]);
+
+    useEffect(() => {
+        if (isEmpty(props.owner)) {
+            return;
+        }
+        const savedChatList = localStorage.getItem(`chatList-${props.owner.email}`);
+        console.log('savedChatList: ', savedChatList);
+        if (savedChatList !== 'null') {
+            const parsedChatList = JSON.parse(savedChatList);
+            setChatList([...parsedChatList]);
+            if (props.needToShowChatBox && parsedChatList.length > 0)  {
+                props.handleUser(parsedChatList[0].to);
+            }
+        }
+    }, [props.owner]);
 
     if (isLoading) {
         return (
