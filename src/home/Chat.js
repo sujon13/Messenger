@@ -211,7 +211,7 @@ export default function Chat(props) {
                 direction="col" 
                 spacing={1}
             >
-                <Grid item xs={12}>
+                <Grid item xs={12} style={{marginTop: '0px'}}>
                     {
                         isEmpty(props.user) ? '' : <ChatTopBar user={props.user}/>  
                     }
@@ -227,11 +227,11 @@ export default function Chat(props) {
                     container 
                     item xs={12}
                     style={{ 
-                        position: 'fixed', 
-                        bottom: '0', 
+                        position: 'fixed',
+                        bottom: '0',
                         paddingLeft: '16px',
-                        marginBottom: '5px', 
-                        width: '67%'
+                        marginBottom: '3px', 
+                        width: '67%',
                     }}
                 >
                     <Grid item xs={11}>
@@ -352,7 +352,10 @@ function ChatBox(props) {
                 id='chatBox'
                 container 
                 direction="col"
-                style={{maxHeight: '80vh', overflow: 'auto'}}
+                style={{ 
+                    maxHeight: '80vh',
+                    overflow: 'auto',
+                }}
                 spacing={2} 
                 onScroll={handleScroll}   
             >

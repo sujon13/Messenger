@@ -103,7 +103,7 @@ export default function EmailVerify(props) {
             const option = {
                 method: 'post',
                 url: `${baseUrl}/auth/otps/request`,
-                data: { email: 'arifurrahmansujon28@gmail.com' }
+                data: { email: data.email }
             };
 
             try {
@@ -117,6 +117,24 @@ export default function EmailVerify(props) {
         };
         requestForotp();
     }, [data]);
+
+    const signup = async () => {
+        const baseUrl = 'http://localhost:3001/api/v1';
+        const option = {
+            method: 'post',
+            url: `${baseUrl}/users/`,
+            data: data,
+        };
+        try {
+            const response = await axios(option);
+            console.log(response.data);
+            if (response.status === 201) {
+                history.push('/signin');
+            }
+        } catch(error) {
+            console.log(error.response);
+        }
+    }
 
     async function handleSubmit(e) {
         e.preventDefault();
@@ -136,12 +154,11 @@ export default function EmailVerify(props) {
         setIsLoading(true);
         try {
             const response = await axios(option);
-            if (response.data) {
+            if (response.status === 200) {
                 console.log(response.data);
-                // setData(response.data);
-                // setIsLoading(false);
-                // history.push('/home', response.data);
+                await signup();
             }
+            setIsLoading(false);
         } catch(error) {
             if(error.response) {
                 console.log(error.response);
@@ -156,7 +173,7 @@ export default function EmailVerify(props) {
 
     const manageTimerPart = () => {
         if (resendDisabled) {
-            return <span> after <Timer time={120} handleTime = { handleTime }/> s</span>;
+            return <span> after <Timer time={60} handleTime = { handleTime }/> s</span>;
         } else {
             return <span> now</span>;
         }

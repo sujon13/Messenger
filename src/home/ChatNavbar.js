@@ -38,25 +38,27 @@ export default function ChatTopBar(props) {
 
     const [lastSeen, setLastSeen] = useState('');
 
-    useEffect(() => {
-        const interval = setInterval(async () => {
-            const baseUrl = 'http://localhost:4001/api/v1';
-            const option = {
-                method: 'GET',
-                url: `${baseUrl}/status/`,
-            };
-            try {
-                const response = await axios(option);
-                if (response.data) {
-                    //console.log('updated status received ', props.user);
-                    const activeStatus = lastActive(response.data, props.user);
-                    setLastSeen(activeStatus);
-                    
-                }
-            } catch(error) {
-                console.log(error);
+    const fetchStatus = async (user = props.user) => {
+        const baseUrl = 'http://localhost:4001/api/v1';
+        const option = {
+            method: 'GET',
+            url: `${baseUrl}/status/`,
+        };
+        try {
+            const response = await axios(option);
+            if (response.data) {
+                console.log('updated status received ', user);
+                const activeStatus = lastActive(response.data, user);
+                setLastSeen(activeStatus);      
             }
-        }, 1000);
+        } catch(error) {
+            console.log(error);
+        }
+    }
+
+    useEffect(() => {
+        fetchStatus(props.user);
+        const interval = setInterval(fetchStatus, 5000);
 
         return () =>  {
             setLastSeen('');
@@ -76,7 +78,7 @@ export default function ChatTopBar(props) {
                 elevation={1}
             >
                 <Grid container direction="row">
-                    <Grid item xs={1}>
+                    <Grid item xs={3} sm={2} md={1}>
                         <Avatar 
                             alt={props.user.name} 
                             src={props.user.profilePicUrl 
@@ -85,8 +87,8 @@ export default function ChatTopBar(props) {
                             }
                         />
                     </Grid>
-                    <Grid container item xs={10} direction='col'> 
-                        <Grid item xs={11}>
+                    <Grid container item xs={9} sm={10} md={11} direction='col'> 
+                        <Grid item xs={12}>
                             <Typography className={classes.title}>
                                 {props.user.name}
                             </Typography>

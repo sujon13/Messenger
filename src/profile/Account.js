@@ -240,7 +240,6 @@ export default function Profile(props) {
     );
 }
 
-
 function EditProfile(props) {
     const classes = useStyles();
 

@@ -185,7 +185,7 @@ export default function Home(props) {
                     direction="row" 
                     spacing={1}
                 >
-                    <Grid container item direction="col" sm={4} spacing={1}>
+                    <Grid container item direction="col"xs={4} spacing={1}>
                         <Grid 
                             item xs={12}
                             style={{height: '40px', width: '33%', position: 'fixed', marginTop: '0px'}}
@@ -272,7 +272,7 @@ export default function Home(props) {
                             }
                         </Grid>
                     </Grid>
-                    <Grid item sm={8}>
+                    <Grid item xs={8}>
                         {
                             // (isEmpty(user) === false)
                             //     ? <Chat user = {user} owner = {owner}/>
