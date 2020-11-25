@@ -9,7 +9,6 @@ import Avatar from '@material-ui/core/Avatar';
 import TextField from '@material-ui/core/TextField';
 import EmailSharpIcon from '@material-ui/icons/EmailSharp';
 import PhoneEnabledSharpIcon from '@material-ui/icons/PhoneEnabledSharp';
-import DialogTitle from '@material-ui/core/DialogTitle';
 import Dialog from '@material-ui/core/Dialog';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 import CircularProgress from '@material-ui/core/CircularProgress';
@@ -137,7 +136,7 @@ export default function Profile(props) {
                     >
                         <Avatar 
                             alt="Remy Sharp" 
-                            src={`http://localhost:3001/${profile.profilePicUrl}`} 
+                            src={`${process.env.REACT_APP_AUTH_BASEURL}/${profile.profilePicUrl}`} 
                             className={classes.large}
                             style={{
                                 display: 'block',
@@ -248,7 +247,7 @@ function EditProfile(props) {
 
     const [profile, setProfile] = useState({});
     const [updatedProfile, setUpdatedProfile] = useState({});
-    const [selectedImage, setSelectedImage] = useState(`http://localhost:3001/${props.profile.profilePicUrl}`);
+    const [selectedImage, setSelectedImage] = useState(`${process.env.REACT_APP_AUTH_BASEURL}/${props.profile.profilePicUrl}`);
     const [isSaving, setIsSaving] = useState(false);
     const [saveData, setSaveData] = useState(false);
     const[image, setImage] = useState(null);
@@ -281,7 +280,7 @@ function EditProfile(props) {
     }
 
     const handleSave = async () => {
-        const baseUrl = 'http://localhost:3001/api/v1';
+        const baseUrl = `${process.env.REACT_APP_AUTH_BASEURL}/api/v1`;
         const token = localStorage.getItem(`token-${profile.email}`);
         const id = localStorage.getItem(`userId-${profile.email}`);
         console.log(id);

@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
-import Box from '@material-ui/core/Box';
-import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
-import Paper from '@material-ui/core/Paper';
 import Snackbar from '@material-ui/core/Snackbar';
 
 import { useHistory } from "react-router-dom";
@@ -106,9 +103,8 @@ export default function Home(props) {
     }
 
     const fetchUsers = async (accessToken, owner) => {
-        const baseUrl = 'http://localhost:3001/api/v1';
-        //const baseUrl = 'http://f117216464b9.ngrok.io/api/v1';
-        const option = {
+        const baseUrl = `${process.env.REACT_APP_AUTH_BASEURL}/api/v1`;
+        const option = {  
             method: 'get',
             url: `${baseUrl}/users`,
             params: {

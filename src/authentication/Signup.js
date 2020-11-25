@@ -1,12 +1,8 @@
 import React, { useState } from 'react';
-import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
 import Grid from '@material-ui/core/Grid';
-import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
@@ -15,31 +11,11 @@ import axios from 'axios';
 import { Helmet } from 'react-helmet';
 
 import {
-    BrowserRouter as Router,
-    Switch,
-    Route,
     Link,
-    Redirect,
     useHistory,
 } from "react-router-dom";
 
-import Signin from './Signin';
-import EmailVerify from './EmailVerify';
 import { hasInternetConnection } from './../util';
-
-
-function Copyright() {
-    return (
-        <Typography variant="body2" color="textSecondary" align="center">
-            {'Copyright © '}
-            <Link color="inherit" href="https://material-ui.com/">
-                Your Website
-            </Link>{' '}
-            {new Date().getFullYear()}
-            {'.'}
-        </Typography>
-    );
-}
 
 const useStyles = makeStyles((theme) => ({
     paper: {
@@ -87,6 +63,13 @@ export default function SignUp() {
         setError('');
     }
 
+    const hasOnlySpace = (value) => {
+        for(const letter of value) {
+            if(letter !== ' ')return false;
+        }
+        return true;
+    }
+
     async function handleSubmit(e) {
         e.preventDefault();
         if (!hasInternetConnection(true))return;
@@ -96,12 +79,11 @@ export default function SignUp() {
             return;
         }
 
-        const baseUrl = 'http://localhost:3001/api/v1';
-        //const baseUrl = 'http://f117216464b9.ngrok.io/api/v1';
+        const baseUrl = `${process.env.REACT_APP_AUTH_BASEURL}/api/v1`;
         const data = {
             name: name,
             email: email,
-            phoneNumber: phoneNo,
+            phoneNumber: hasOnlySpace(phoneNo) ? ' ' : phoneNo,
             password: password
         };
         const option = {
@@ -116,7 +98,6 @@ export default function SignUp() {
             if (response.status === 200) {
                 setIsLoading(false);
                 history.push('/signup/email-verify', data);
-                //window.location = '/signin';
             }
         } catch(error) {
             console.log(error);
@@ -141,6 +122,12 @@ export default function SignUp() {
         }
     }
 
+    const validatePhoneNumber  = phoneNo => {
+        if (phoneNo === ' ')return true;
+        const regex = /^01[3456789]{1}[0-9]{8}$/;
+        return regex.test(phoneNo);
+    }
+
     function isFormValid() {
         if(name === '') {
             setNameError('Name field is required');
@@ -151,10 +138,15 @@ export default function SignUp() {
             setEmailError('Email field is required');
             return false;
         }
-
-        if(phoneNo === '') {
-            setPhoneNoError('Phone number field is required');
-            return false;
+        
+        if (phoneNo.length > 0) {
+            if (phoneNo.length !== 11) {
+                setPhoneNoError('Phone number must contain 11 digits');
+                return false;
+            } else if (!validatePhoneNumber(phoneNo)) {
+                setPhoneNoError('Phone number is invalid. A valid phone number should be in "01712******" format');
+                return false;
+            }
         }
 
         if(password === '') {
@@ -229,7 +221,7 @@ export default function SignUp() {
                             <TextField
                                 variant="outlined"
                                 value={phoneNo}
-                                required
+                                required = {false}
                                 error={phoneNoError !== ''}
                                 fullWidth
                                 id="phoneNo"

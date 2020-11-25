@@ -65,7 +65,7 @@ export default function BadgeAvatar(props) {
         <Avatar 
             alt={props.src.name} 
             src={props.src.profilePicUrl
-                ? `http://localhost:3001/${props.src.profilePicUrl}`
+                ? `${process.env.REACT_APP_AUTH_BASEURL}/${props.src.profilePicUrl}`
                 : props.src.name
             } 
         />

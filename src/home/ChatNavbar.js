@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
-import IconButton from '@material-ui/core/IconButton';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import { Avatar } from '@material-ui/core';
@@ -39,7 +37,7 @@ export default function ChatTopBar(props) {
     const [lastSeen, setLastSeen] = useState('');
 
     const fetchStatus = async (user = props.user) => {
-        const baseUrl = 'http://localhost:4001/api/v1';
+        const baseUrl = `${process.env.REACT_APP_CHAT_BASEURL}/api/v1`;
         const option = {
             method: 'GET',
             url: `${baseUrl}/status/`,
@@ -82,7 +80,7 @@ export default function ChatTopBar(props) {
                         <Avatar 
                             alt={props.user.name} 
                             src={props.user.profilePicUrl 
-                                ? `http://localhost:3001/${props.user.profilePicUrl}`
+                                ? `${process.env.REACT_APP_AUTH_BASEURL}/${props.user.profilePicUrl}`
                                 : props.user.name
                             }
                         />

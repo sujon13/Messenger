@@ -1,8 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
-import IconButton from '@material-ui/core/IconButton';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import Divider from '@material-ui/core/Divider';
@@ -58,7 +56,7 @@ export default function UserList(props) {
                                         <Avatar 
                                             alt={user.name} 
                                             src={user.profilePicUrl 
-                                                ? `http://localhost:3001/${user.profilePicUrl}`
+                                                ? `${process.env.REACT_APP_AUTH_BASEURL}/${user.profilePicUrl}`
                                                 : user.name
                                             }
                                         />

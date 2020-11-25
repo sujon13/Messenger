@@ -1,10 +1,7 @@
-import React, {useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
-import IconButton from '@material-ui/core/IconButton';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import { Avatar } from '@material-ui/core';
@@ -14,10 +11,6 @@ import MenuItem from '@material-ui/core/MenuItem';
 import SettingsIcon from '@material-ui/icons/Settings';
 
 import {
-    BrowserRouter as Router,
-    Switch,
-    Route,
-    Link,
     Redirect,
     useHistory,
 } from "react-router-dom";
@@ -87,7 +80,7 @@ export default function LeftTopBar(props) {
                         <Tooltip title={props.owner.name} placement="right">
                             <Avatar 
                                 alt={props.owner.name} 
-                                src={ `http://localhost:3001/${props.owner.profilePicUrl}`}
+                                src={ `${process.env.REACT_APP_AUTH_BASEURL}/${props.owner.profilePicUrl}`}
                             />
                         </Tooltip>
                     </Grid>

@@ -1,30 +1,18 @@
-import React, { useEffect, useRef, useState } from 'react';
-import Avatar from '@material-ui/core/Avatar';
+import React, { useEffect, useState } from 'react';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
 import Grid from '@material-ui/core/Grid';
-import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
-import Divider from '@material-ui/core/Divider';
-import Paper from '@material-ui/core/Paper';
 import { makeStyles } from '@material-ui/core/styles';
-import Container from '@material-ui/core/Container';
 
 import axios from 'axios';
 import { Helmet } from 'react-helmet';
 import {isEmpty} from "lodash";
 import {
-    BrowserRouter as Router,
-    Switch,
-    Route,
-    Link,
     useHistory
 } from "react-router-dom";
 
-import chatIcon from './../static/images/chatIcon.png';
 import { hasInternetConnection } from './../util';
 import { isDigit } from './../util';
 import Timer from './../utility/Timer';
@@ -99,7 +87,7 @@ export default function EmailVerify(props) {
             return;
         }
         const requestForotp = async () => {
-            const baseUrl = 'http://localhost:3001/api/v1';
+            const baseUrl =`${process.env.REACT_APP_AUTH_BASEURL}/api/v1`;
             const option = {
                 method: 'post',
                 url: `${baseUrl}/auth/otps/request`,
@@ -119,7 +107,7 @@ export default function EmailVerify(props) {
     }, [data]);
 
     const signup = async () => {
-        const baseUrl = 'http://localhost:3001/api/v1';
+        const baseUrl = `${process.env.REACT_APP_AUTH_BASEURL}/api/v1`;
         const option = {
             method: 'post',
             url: `${baseUrl}/users/`,
@@ -141,7 +129,7 @@ export default function EmailVerify(props) {
         if (!hasInternetConnection(true))return;
         setError('');
         
-        const baseUrl = 'http://localhost:3001/api/v1';
+        const baseUrl = `${process.env.REACT_APP_AUTH_BASEURL}/api/v1`;
         const option = {
             method: 'post',
             url: `${baseUrl}/auth/otps/verify`,
