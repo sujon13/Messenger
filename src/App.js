@@ -6,7 +6,7 @@ import Profile from './profile/Account';
 import EmailVerify from './authentication/EmailVerify';
 
 import {
-    BrowserRouter as Router,
+    HashRouter as Router,
     Switch,
     Route,
 } from "react-router-dom";
