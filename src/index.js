@@ -4,7 +4,7 @@ import App from './App';
 import * as serviceWorker from './serviceWorker';
 
 if (process.env.NODE_ENV !== "development")
-    console.log = () => {};
+    //console.log = () => {};
     
 ReactDOM.render(
   <React.Fragment>
