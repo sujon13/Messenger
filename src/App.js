@@ -35,9 +35,9 @@ function App() {
                     <Route path="/signup/email-verify">
                         <EmailVerify/>
                     </Route>
-                    <Route path="/" exact>
+                    {/* <Route path="/" exact>
                         <SignUp />
-                    </Route>
+                    </Route> */}
                     <Route path="/home" exact>
                         <Home/>
                     </Route>

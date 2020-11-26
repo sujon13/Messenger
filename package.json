@@ -2,7 +2,6 @@
   "name": "my-messenger",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://sujon13.github.io/Messenger",
   "dependencies": {
     "@material-ui/core": "^4.11.0",
     "@material-ui/icons": "^4.9.1",
@@ -10,8 +9,10 @@
     "@testing-library/react": "^9.5.0",
     "@testing-library/user-event": "^7.2.1",
     "axios": "^0.20.0",
+    "express": "^4.17.1",
     "lodash": "^4.17.20",
     "moment": "^2.29.1",
+    "path": "^0.12.7",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-helmet": "^6.1.0",
