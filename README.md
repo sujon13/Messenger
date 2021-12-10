@@ -1,6 +1,8 @@
-This is a sample chat application for browser (currently not responsive for small screen like mobile phone). 
+This is a simple chat application for browser (currently not responsive for small screen like mobile phone). 
 
-Currently only one-to-one chat is supported. I am still working on this project.
+ Currently only one-to-one chat is supported. 
+
+I am still working on this project. Hopefully in near future I will release new version which will fix bugs and will have many new features.
 
 ## Live URL ##
 [EasyChat](http://messenger.sujon13.s3-website.ap-south-1.amazonaws.com/)
