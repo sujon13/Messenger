@@ -52,7 +52,7 @@ export default function UserList(props) {
                                     style={{backgroundColor: '#f2f2f2'}}
                                     onClick={() => { props.handleUser(user) }}
                                 >
-                                    <Grid item xs={3}>
+                                    <Grid item xs={5} sm={4} md={3}>
                                         <Avatar 
                                             alt={user.name} 
                                             src={user.profilePicUrl 
@@ -63,7 +63,9 @@ export default function UserList(props) {
                                     </Grid>
                                     <Grid 
                                         item 
-                                        xs={9} 
+                                        xs={7} 
+                                        sm={8}
+                                        md={9}
                                         style={{
                                             margin: 'auto',
                                         }}

@@ -181,10 +181,15 @@ export default function Home(props) {
                     direction="row" 
                     spacing={1}
                 >
-                    <Grid container item direction="col"xs={4} spacing={1}>
+                    <Grid container item direction="col" xs={4} sm={4} spacing={1}>
                         <Grid 
                             item xs={12}
-                            style={{height: '40px', width: '33%', position: 'fixed', marginTop: '0px'}}
+                            style={{
+                                height: '40px', 
+                                width: '33%', 
+                                position: 'fixed', 
+                                marginTop: '0px'
+                            }}
                         >
                             <LeftTopBar owner={owner}/>
                         </Grid>
@@ -218,7 +223,7 @@ export default function Home(props) {
                                     color={isChatShown === true ? 'default' : 'primary'}
                                     onClick={() => setIsChatShown(false)}
                                 >
-                                    All Users
+                                    Users
                                 </Button>
                             </Grid>
                         </Grid>
@@ -228,7 +233,11 @@ export default function Home(props) {
                             xs={12} 
                             className={classes.list} 
                             onScroll={handleScroll}
-                            style={{position: 'fixed', marginTop: '80px', width: '33%'}}
+                            style={{
+                                position: 'fixed', 
+                                marginTop: '80px', 
+                                width: '33%'
+                            }}
                         >
                             {
                                 isLoading 
@@ -268,7 +277,7 @@ export default function Home(props) {
                             }
                         </Grid>
                     </Grid>
-                    <Grid item xs={8}>
+                    <Grid item xs={8} sm={8}>
                         {
                             // (isEmpty(user) === false)
                             //     ? <Chat user = {user} owner = {owner}/>
