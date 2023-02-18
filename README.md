@@ -5,7 +5,7 @@ This is a simple chat application for browser (currently not responsive for smal
 I am still working on this project. Hopefully in near future I will release new version which will fix bugs and will have many new features.
 
 ## Live URL ##
-[EasyChat](http://messenger.sujon13.s3-website.ap-south-1.amazonaws.com/)
+[EasyChat](http://easy-chat1.s3-website-ap-southeast-1.amazonaws.com/)
 
 ## Backend Link
 I used two repositories for backend. One for authentication and another for chat application.
